@@ -40,19 +40,23 @@
     },
     "quality": {
       "title": "Quality control",
-      "body": "We vet sources and creatives and match audiences to the offer so traffic stays clean and on-brief."
+      "body": "We vet sources, creatives, and audience–offer fit so traffic stays clean."
     },
     "support": {
       "title": "Fast support",
-      "body": "Real humans in chat: clarify angles, fix a bundle fast, or help you read what the data is saying."
+      "body": "Real people in chat: angles, bundle fixes, or a quick campaign tweak when you need it."
     },
     "professionalism": {
-      "title": "Professionalism and long-term focus",
-      "body": "Deep hands-on media buying experience—we care about unit economics and durable growth, not one-day spikes."
+      "title": "Experience & horizon",
+      "body": "Hands-on buying: unit economics and durable growth beat one-day spikes."
     },
     "transparency": {
       "title": "Transparency",
-      "body": "Stats, breakdowns, and reporting in a format you can use—see where the lead came from and how the funnel behaves."
+      "body": "Stats and reports you can use—lead source and funnel behavior, clearly."
+    },
+    "scaling": {
+      "title": "Scale",
+      "body": "We grow volume where the bundle is proven—without jumps that wreck conversion."
     }
   },
   "models": {
