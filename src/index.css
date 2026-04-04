@@ -1,0 +1,220 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+
+  /* Чуть светлее базовый тёмный — фон читается живее */
+  --color-background: #121214;
+  --color-foreground: #fafafa;
+  --color-card: #18181b;
+  --color-card-foreground: #f4f4f5;
+  --color-muted: #a3a3a3;
+  --color-muted-foreground: #a1a1aa;
+  /* Приглушённый акцент: меньше «кричащего» красного */
+  --color-accent: #a63d42;
+  --color-accent-hover: #8f3439;
+  --color-accent-foreground: #ffffff;
+  --color-border: #27272a;
+  --color-header-bg: color-mix(in srgb, var(--color-background) 80%, transparent);
+}
+
+@keyframes ambient-drift-a {
+  0%,
+  100% {
+    transform: translate(-18%, -12%) scale(1);
+    opacity: 0.38;
+  }
+  50% {
+    transform: translate(14%, 16%) scale(1.16);
+    opacity: 0.58;
+  }
+}
+
+@keyframes ambient-drift-b {
+  0%,
+  100% {
+    transform: translate(18%, 22%) scale(1.08);
+    opacity: 0.34;
+  }
+  50% {
+    transform: translate(-16%, -18%) scale(0.94);
+    opacity: 0.52;
+  }
+}
+
+@keyframes ambient-drift-c {
+  0%,
+  100% {
+    transform: translate(-12%, 28%) scale(1.05);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translate(20%, -14%) scale(1.2);
+    opacity: 0.5;
+  }
+}
+
+@keyframes ambient-drift-d {
+  0%,
+  100% {
+    transform: translate(8%, -10%) scale(1.1);
+    opacity: 0.28;
+  }
+  50% {
+    transform: translate(-18%, 18%) scale(0.96);
+    opacity: 0.46;
+  }
+}
+
+@keyframes ambient-sweep {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.05);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@keyframes ambient-pulse-core {
+  0%,
+  100% {
+    opacity: 0.42;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.68;
+    transform: translate(-50%, -50%) scale(1.14);
+  }
+}
+
+.ambient-glow-sweep {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 160vmax;
+  height: 160vmax;
+  margin-left: -80vmax;
+  margin-top: -80vmax;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    transparent 0deg,
+    rgba(165, 180, 252, 0.22) 55deg,
+    transparent 115deg,
+    rgba(186, 198, 214, 0.16) 185deg,
+    transparent 245deg,
+    rgba(196, 100, 105, 0.12) 305deg,
+    transparent 360deg
+  );
+  filter: blur(56px);
+  animation: ambient-sweep 48s linear infinite;
+  opacity: 1;
+}
+
+.ambient-pulse-core {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: min(90vmax, 1000px);
+  height: min(90vmax, 1000px);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle,
+    rgba(129, 140, 248, 0.16) 0%,
+    rgba(166, 61, 66, 0.08) 38%,
+    transparent 62%
+  );
+  filter: blur(48px);
+  animation: ambient-pulse-core 9s ease-in-out infinite;
+}
+
+.ambient-blob {
+  position: absolute;
+  width: min(55vmax, 720px);
+  height: min(55vmax, 720px);
+  border-radius: 50%;
+  filter: blur(80px);
+  will-change: transform, opacity;
+}
+
+.ambient-blob-a {
+  left: -15%;
+  top: -10%;
+  background: radial-gradient(
+    circle,
+    rgba(196, 100, 105, 0.22) 0%,
+    transparent 68%
+  );
+  animation: ambient-drift-a 18s ease-in-out infinite;
+}
+
+.ambient-blob-b {
+  right: -20%;
+  top: 25%;
+  background: radial-gradient(circle, rgba(148, 163, 184, 0.38) 0%, transparent 65%);
+  animation: ambient-drift-b 22s ease-in-out infinite;
+}
+
+.ambient-blob-c {
+  left: 18%;
+  bottom: -12%;
+  background: radial-gradient(circle, rgba(129, 140, 248, 0.2) 0%, transparent 70%);
+  animation: ambient-drift-c 26s ease-in-out infinite;
+}
+
+.ambient-blob-d {
+  right: 5%;
+  bottom: 20%;
+  width: min(48vmax, 560px);
+  height: min(48vmax, 560px);
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.14) 0%, transparent 68%);
+  animation: ambient-drift-d 30s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-glow-sweep {
+    animation: none;
+    opacity: 0.55;
+  }
+
+  .ambient-pulse-core {
+    animation: none;
+    opacity: 0.4;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .ambient-blob-a,
+  .ambient-blob-b,
+  .ambient-blob-c,
+  .ambient-blob-d {
+    animation: none;
+    opacity: 0.32;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  font-family: var(--font-sans);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100svh;
+}
