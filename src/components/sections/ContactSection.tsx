@@ -22,7 +22,6 @@ export function ContactSection() {
     resolver: zodResolver(leadFormSchema),
     defaultValues: {
       name: '',
-      phone: '',
       telegram: '',
       message: '',
     },
@@ -86,20 +85,6 @@ export function ContactSection() {
                 {translateFieldError(errors.name.message)}
               </p>
             ) : null}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-foreground" htmlFor="lead-phone">
-              {t('contact.phone')}{' '}
-              <span className="text-muted-foreground">({t('contact.optional')})</span>
-            </label>
-            <input
-              id="lead-phone"
-              type="tel"
-              autoComplete="tel"
-              className="mt-1.5 w-full rounded-lg border border-white/10 bg-black/35 px-3 py-2.5 text-sm text-foreground outline-none transition-colors focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30"
-              {...register('phone')}
-            />
           </div>
 
           <div>

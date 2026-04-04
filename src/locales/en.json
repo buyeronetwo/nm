@@ -1,13 +1,13 @@
 {
   "meta": {
-    "title": "Media buying — traffic and partnerships"
+    "title": "TrafficCore — No Mercy"
   },
   "brand": {
-    "name": "TrafficCore"
+    "name": "TrafficCore — No Mercy"
   },
   "nav": {
     "mainNav": "Main navigation",
-    "why": "Why us",
+    "why": "Why us?",
     "models": "Models",
     "about": "About",
     "careers": "Careers",
@@ -25,14 +25,14 @@
   },
   "hero": {
     "eyebrow": "Traffic · Scale · Transparency",
-    "offerBefore": "Generating and selling",
-    "offerAccent": "high-quality traffic",
-    "offerAfter": "for your goals.",
-    "subtitle": "Global partners: steady delivery and clear reporting.",
+    "offerBefore": "Lead-gen traffic for the",
+    "offerAccent": "Forex",
+    "offerAfter": "vertical",
+    "subtitle": "We work with partners worldwide",
     "guideCaption": "Stylized guide figure — swap in your final brand artwork"
   },
   "why": {
-    "title": "Why us",
+    "title": "Why us?",
     "imageAlt": "Illustration for the “Why us” section",
     "lead": "We don’t trade random clicks. We engineer the path to your KPI—from first touch to the action that matters—with quality checks at every step.",
     "stability": {
@@ -53,7 +53,7 @@
     },
     "transparency": {
       "title": "Transparency",
-      "body": "Stats and reports you can use—lead source and funnel behavior, clearly."
+      "body": "Stats and reports you can use—traffic source and funnel, clearly laid out."
     },
     "scaling": {
       "title": "Scale",
@@ -102,7 +102,7 @@
     "lead": "We’re hiring an Affiliate Manager to grow partner relationships and scale traffic without sacrificing quality.",
     "roleTitle": "Affiliate Manager",
     "roleRequirementsLabel": "Requirements",
-    "roleRequirements": "At least 1 year in affiliate, media buying, or a related role—partners, offers, reporting, and day-to-day chat with partners.",
+    "roleRequirements": "At least 1 year in affiliate, media buying, or other relevant roles.",
     "applyIntro": "Apply via the site form or Telegram—mention the role so we can route your message quickly.",
     "applyTelegram": "Telegram"
   },
@@ -111,19 +111,19 @@
     "lead": "Want to launch and scale traffic without surprises? Here are four steps—from your request to a live campaign and clear early numbers.",
     "imageAlt": "Stylized guide figure in a dark palette with a red accent—visual for the “How to get started” section.",
     "step1Question": "Where do we begin?",
-    "step1Answer": "With a request on the site—a couple of minutes, and we already see context: vertical, geo, and your preferred model.",
+    "step1Answer": "With a request on the site—a couple of minutes, and we already see your ask: vertical, geo, and your preferred model.",
     "step2Question": "How will you contact me?",
     "step2Answer": "We’ll reach out—align on goals, risk tolerance, and what “success” means in your numbers.",
     "step3Question": "How do we pick strategy and format?",
-    "step3Answer": "We agree on the funnel and model—CPL, CRG, or CPA: whichever fits your product and KPIs best.",
-    "step4Question": "What happens after launch?",
-    "step4Answer": "We launch the campaign, run traffic, watch performance, and quickly tighten what improves CPL and ROI.",
+    "step3Answer": "We align on bundle and model—CPL, CRG, or CPA: what fits the start of our partnership and your targeting best.",
+    "step4Question": "Final stage",
+    "step4Answer": "We launch a new campaign or scale an existing one, run traffic, watch performance, and quickly tighten what drives the best outcome.",
     "closing": "Ready to talk through your brief? Submit a request—we’ll align on details and the next step without extra friction."
   },
   "faq": {
     "title": "Frequently asked questions",
     "q0": "Why us?",
-    "a0": "We don’t sell clicks for their own sake—we build funnels around your KPIs, keep traffic quality in check, and share clear reporting. Fast communication, transparent terms, and a partnership mindset built for the long run.",
+    "a0": "We don’t sell uninterested leads—we build or scale funnels around your KPIs, keep traffic quality in check, and share clear reporting. Fast communication, transparent terms, and a partnership mindset built for the long run.",
     "q1": "How do we integrate?",
     "a1": "We support APIs and CRM-friendly flows—less manual work, more automation from lead to status in your stack.",
     "q2": "Do you work postpay / prepay?",
@@ -137,16 +137,13 @@
     "title": "Contact",
     "subtitle": "Tell us briefly what you need—we’ll come back with a model, timing, and the next step.",
     "name": "Name",
-    "phone": "Phone number",
     "telegram": "Telegram",
     "message": "Message",
     "submit": "Send",
     "sending": "Sending…",
-    "required": "required",
-    "optional": "optional",
     "consent": "By submitting, you agree to the processing of personal data.",
     "success": "Request received. We’ll contact you soon.",
-    "successNote": "Messenger integration is added separately — this demo stores the submission locally.",
+    "successNote": "Your request was sent to our team on Telegram — we’ll get back to you shortly.",
     "errorGeneric": "Could not send. Try again later or message us on Telegram.",
     "errors": {
       "nameRequired": "Please enter your name",
@@ -156,12 +153,12 @@
   },
   "footer": {
     "tagline": "We deliver outcomes, think long-term, and keep our word with partners.",
-    "telegram": "@your_team",
+    "telegram": "@ceotraffica",
     "rights": "All rights reserved.",
     "privacy": "Privacy policy",
     "terms": "Terms of use"
   },
   "messages": {
-    "core": "We deliver results · Long-term focus · Quality traffic · Reliable partner"
+    "core": "Reliable partner"
   }
 }

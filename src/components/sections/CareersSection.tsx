@@ -27,7 +27,7 @@ export function CareersSection() {
 
       <ScrollReveal className="mt-10" delaySeconds={0.06}>
         <article className="rounded-2xl border border-white/8 bg-card/85 p-6 shadow-lg shadow-black/40 backdrop-blur-xl md:p-8">
-          <h3 className="text-xl font-bold tracking-tight text-accent md:text-2xl">
+          <h3 className="text-accent-volume text-xl font-bold tracking-tight md:text-2xl">
             {t('careers.roleTitle')}
           </h3>
           <p className="mt-3 text-sm font-medium text-foreground">{t('careers.roleRequirementsLabel')}</p>

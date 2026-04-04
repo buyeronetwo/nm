@@ -35,7 +35,7 @@ export function WorkModelsSection() {
             innerClassName="flex h-full flex-col p-6"
           >
             <motion.p
-              className="text-2xl font-black uppercase tracking-[0.12em] text-accent drop-shadow-[0_0_24px_rgba(181,23,32,0.35)] md:text-3xl"
+              className="text-accent-volume text-2xl font-black uppercase tracking-[0.12em] drop-shadow-[0_0_24px_rgba(181,23,32,0.35)] md:text-3xl"
               initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
               whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.25 }}

@@ -241,6 +241,20 @@ html {
   }
 }
 
+/* Тёмная «обводка» у красного текста — читаемость и объём как на референсе */
+.text-accent-volume {
+  color: var(--color-accent);
+  text-shadow:
+    -1px -1px 0 #050506,
+    1px -1px 0 #050506,
+    -1px 1px 0 #050506,
+    1px 1px 0 #050506,
+    0 -1px 0 #050506,
+    0 1px 0 #050506,
+    -1px 0 0 #050506,
+    1px 0 0 #050506;
+}
+
 body {
   margin: 0;
   min-height: 100svh;

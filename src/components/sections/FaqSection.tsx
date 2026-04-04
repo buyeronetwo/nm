@@ -43,11 +43,11 @@ export function FaqSection() {
                   aria-controls={answerId}
                   onClick={() => setOpenIndex(isOpen ? null : index)}
                 >
-                  <span className="text-base font-bold leading-snug tracking-tight text-accent md:text-lg">
+                  <span className="text-accent-volume text-base font-bold leading-snug tracking-tight md:text-lg">
                     {t(`faq.q${index}`)}
                   </span>
                   <motion.span
-                    className={cn('text-xl', isOpen ? 'text-accent' : 'text-muted')}
+                    className={cn('text-xl', isOpen ? 'text-accent-volume' : 'text-muted')}
                     animate={{ rotate: isOpen ? 45 : 0 }}
                     transition={panelTransition}
                     aria-hidden

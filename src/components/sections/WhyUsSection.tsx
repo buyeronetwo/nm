@@ -69,7 +69,7 @@ export function WhyUsSection() {
                   innerClassName="flex flex-col p-4 sm:p-5"
                 >
                   <motion.h3
-                    className="text-base font-bold leading-tight tracking-tight text-accent sm:text-[1.05rem]"
+                    className="text-accent-volume text-base font-bold leading-tight tracking-tight sm:text-[1.05rem]"
                     initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
                     whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.25 }}

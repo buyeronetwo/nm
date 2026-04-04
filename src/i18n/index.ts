@@ -9,6 +9,13 @@ import uk from '@/locales/uk.json'
 export const supportedLanguages = ['ru', 'uk', 'en'] as const
 export type SupportedLanguage = (typeof supportedLanguages)[number]
 
+/** Подписи на кнопках переключателя (uk → UA) */
+export const languageDisplayLabels: Record<SupportedLanguage, string> = {
+  ru: 'RU',
+  uk: 'UA',
+  en: 'EN',
+}
+
 void i18n
   .use(LanguageDetector)
   .use(initReactI18next)

@@ -69,7 +69,7 @@ export function HeroSection() {
         )}
       >
         <ScrollReveal className="w-full">
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-accent sm:text-sm">
+          <p className="text-accent-volume text-xs font-medium uppercase tracking-[0.2em] sm:text-sm">
             {t('hero.eyebrow')}
           </p>
           <h1
@@ -78,7 +78,7 @@ export function HeroSection() {
           >
             <span className="block">
               {t('hero.offerBefore')}{' '}
-              <span className="text-accent">{t('hero.offerAccent')}</span>{' '}
+              <span className="text-accent-volume">{t('hero.offerAccent')}</span>{' '}
               {t('hero.offerAfter')}
             </span>
           </h1>

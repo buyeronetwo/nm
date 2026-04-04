@@ -2,7 +2,11 @@ import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 
-import { supportedLanguages, type SupportedLanguage } from '@/i18n'
+import {
+  languageDisplayLabels,
+  supportedLanguages,
+  type SupportedLanguage,
+} from '@/i18n'
 import { cn } from '@/lib/cn'
 
 type HeaderLanguageSwitchProperties = {
@@ -128,7 +132,7 @@ export function HeaderLanguageSwitch({ variant, className }: HeaderLanguageSwitc
                 isActive ? 'text-foreground' : 'text-muted hover:text-foreground',
               )}
             >
-              {language}
+              {languageDisplayLabels[language]}
             </button>
           )
         })}
