@@ -107,13 +107,18 @@
     "applyTelegram": "Telegram"
   },
   "start": {
-    "title": "How to get started",
-    "lead": "Getting started is simple: you frame the job—we bring the sources, process, and expertise to the first stable read on performance.",
-    "step1": "Submit a request on the site—a couple of minutes, and we already see context: vertical, geo, preferred model.",
-    "step2": "We reach out—align on goals, risk tolerance, and what “success” means in your numbers.",
-    "step3": "We agree on strategy and format—CPL, CRG, or CPA: whichever fits your product best.",
-    "step4": "Campaign launch—we run traffic, watch the curve, and quickly tighten what improves CPL/ROI.",
-    "closing": "You get more than “traffic for traffic’s sake”—a partner invested in growing your business the way you would."
+    "title": "How do you start working with us?",
+    "lead": "Want to launch and scale traffic without surprises? Here are four steps—from your request to a live campaign and clear early numbers.",
+    "imageAlt": "Stylized guide figure in a dark palette with a red accent—visual for the “How to get started” section.",
+    "step1Question": "Where do we begin?",
+    "step1Answer": "With a request on the site—a couple of minutes, and we already see context: vertical, geo, and your preferred model.",
+    "step2Question": "How will you contact me?",
+    "step2Answer": "We’ll reach out—align on goals, risk tolerance, and what “success” means in your numbers.",
+    "step3Question": "How do we pick strategy and format?",
+    "step3Answer": "We agree on the funnel and model—CPL, CRG, or CPA: whichever fits your product and KPIs best.",
+    "step4Question": "What happens after launch?",
+    "step4Answer": "We launch the campaign, run traffic, watch performance, and quickly tighten what improves CPL and ROI.",
+    "closing": "Ready to talk through your brief? Submit a request—we’ll align on details and the next step without extra friction."
   },
   "faq": {
     "title": "Frequently asked questions",
