@@ -42,10 +42,10 @@ export function WhyUsSection() {
           </p>
         </ScrollReveal>
 
-        <div className="flex flex-col items-stretch gap-10 lg:flex-row lg:items-stretch lg:gap-12 xl:gap-14">
+        <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-12 xl:gap-14">
           <ScrollReveal className="flex w-full shrink-0 justify-center lg:max-w-[400px] lg:justify-start xl:max-w-[420px]">
-            <figure className="mx-auto w-full max-w-[min(88vw,320px)] sm:max-w-[340px] lg:mx-0 lg:flex lg:h-full lg:max-w-none lg:flex-col lg:justify-center">
-              <div className="relative aspect-2/3 w-full max-lg:mx-auto max-lg:max-w-[320px] overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/60 shadow-2xl shadow-black/50 sm:max-w-[340px] sm:rounded-3xl lg:max-h-[min(100%,720px)] lg:max-w-full">
+            <figure className="mx-auto w-full max-w-[min(88vw,320px)] sm:max-w-[340px] lg:mx-0 lg:max-w-none">
+              <div className="relative aspect-2/3 w-full max-lg:mx-auto max-lg:max-w-[320px] overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/60 shadow-2xl shadow-black/50 sm:max-w-[340px] sm:rounded-3xl lg:max-w-full">
                 <img
                   src={whySectionImage}
                   alt={t('why.imageAlt')}
@@ -60,13 +60,13 @@ export function WhyUsSection() {
             </figure>
           </ScrollReveal>
 
-          <ul className="grid min-w-0 flex-1 auto-rows-fr grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3 xl:gap-4">
+          <ul className="grid min-w-0 flex-1 grid-cols-1 items-start gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3 xl:gap-4">
             {cardKeys.map((key, index) => (
-              <li key={key} className="flex h-full min-h-0">
+              <li key={key} className="min-h-0 w-full">
                 <AnimatedGlassCard
-                  className="h-full w-full min-h-0"
+                  className="w-full"
                   delaySeconds={index * 0.04}
-                  innerClassName="flex h-full min-h-0 flex-col p-4 sm:p-5"
+                  innerClassName="flex flex-col p-4 sm:p-5"
                 >
                   <motion.h3
                     className="text-base font-bold leading-tight tracking-tight text-accent sm:text-[1.05rem]"
@@ -82,7 +82,7 @@ export function WhyUsSection() {
                     {t(`why.${key}.title`)}
                   </motion.h3>
                   <motion.p
-                    className="mt-2 flex-1 text-sm leading-snug text-muted"
+                    className="mt-2 text-sm leading-snug text-muted"
                     initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
                     whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.25 }}

@@ -1,13 +1,21 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 
+import { usePrefersReducedMotion } from '@/hooks'
+import { cn } from '@/lib/cn'
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
 
 const faqIndices = [0, 1, 2, 3, 4] as const
 
 export function FaqSection() {
   const { t } = useTranslation()
+  const prefersReducedMotion = usePrefersReducedMotion()
   const [openIndex, setOpenIndex] = useState<number | null>(0)
+
+  const panelTransition = prefersReducedMotion
+    ? { duration: 0 }
+    : { duration: 0.32, ease: [0.22, 1, 0.36, 1] as const }
 
   return (
     <section id="faq" className="scroll-mt-24" aria-labelledby="faq-heading">
@@ -38,27 +46,34 @@ export function FaqSection() {
                   <span className="text-base font-bold leading-snug tracking-tight text-accent md:text-lg">
                     {t(`faq.q${index}`)}
                   </span>
-                  <span
-                    className={
-                      isOpen
-                        ? 'text-xl text-accent transition-transform rotate-45'
-                        : 'text-xl text-muted transition-transform'
-                    }
+                  <motion.span
+                    className={cn('text-xl', isOpen ? 'text-accent' : 'text-muted')}
+                    animate={{ rotate: isOpen ? 45 : 0 }}
+                    transition={panelTransition}
                     aria-hidden
                   >
                     +
-                  </span>
+                  </motion.span>
                 </button>
-                <div
+                <motion.div
                   id={answerId}
                   role="region"
                   aria-labelledby={questionId}
-                  hidden={!isOpen}
+                  aria-hidden={!isOpen}
+                  initial={false}
+                  animate={{
+                    height: isOpen ? 'auto' : 0,
+                    opacity: isOpen ? 1 : 0,
+                  }}
+                  transition={panelTransition}
+                  className="overflow-hidden"
                 >
-                  <p className="whitespace-pre-line pb-4 text-sm leading-relaxed text-muted">
-                    {t(`faq.a${index}`)}
-                  </p>
-                </div>
+                  <div className="pb-4 pt-0">
+                    <p className="whitespace-pre-line text-sm leading-relaxed text-muted">
+                      {t(`faq.a${index}`)}
+                    </p>
+                  </div>
+                </motion.div>
               </div>
             </ScrollReveal>
           )
