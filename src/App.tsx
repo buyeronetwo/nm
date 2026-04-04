@@ -2,6 +2,7 @@ import { AppShell, SiteFooter, SiteHeader } from '@/components/layout'
 import { HtmlLangSync } from '@/components/providers/HtmlLangSync'
 import {
   AboutSection,
+  CareersSection,
   ContactSection,
   FaqSection,
   HeroSection,
@@ -20,6 +21,7 @@ function App() {
         <WhyUsSection />
         <WorkModelsSection />
         <AboutSection />
+        <CareersSection />
         <HowToStartSection />
         <FaqSection />
         <ContactSection />

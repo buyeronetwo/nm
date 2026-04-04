@@ -3,18 +3,17 @@
 @theme {
   --font-sans: system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
 
-  /* Чуть светлее базовый тёмный — фон читается живее */
-  --color-background: #121214;
-  --color-foreground: #fafafa;
-  --color-card: #18181b;
-  --color-card-foreground: #f4f4f5;
-  --color-muted: #a3a3a3;
-  --color-muted-foreground: #a1a1aa;
+  --color-background: #060607;
+  --color-foreground: #f4f4f5;
+  --color-card: #0c0c0e;
+  --color-card-foreground: #ececee;
+  --color-muted: #94949c;
+  --color-muted-foreground: #8b8b94;
   /* Брендовый красный: #b51720 · RGB 181,23,32 · CMYK 0,87,82,29% */
   --color-accent: #b51720;
   --color-accent-hover: #95141c;
   --color-accent-foreground: #ffffff;
-  --color-border: #27272a;
+  --color-border: #1a1a1f;
   --color-header-bg: color-mix(in srgb, var(--color-background) 80%, transparent);
 }
 
@@ -267,7 +266,7 @@ button:disabled {
 /* Hero: слабый блюр по краям и к низу, к центру почти без размытия */
 .hero-backdrop-vignette {
   pointer-events: none;
-  background-color: rgb(10 10 10 / 0.05);
+  background-color: rgb(0 0 0 / 0.35);
   -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
   -webkit-mask-image: radial-gradient(
@@ -294,6 +293,6 @@ button:disabled {
   .hero-backdrop-vignette {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
-    background-color: rgb(10 10 10 / 0.22);
+    background-color: rgb(0 0 0 / 0.5);
   }
 }

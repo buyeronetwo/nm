@@ -37,7 +37,7 @@ export function AnimatedGlassCard({
       )}
       <motion.div
         className={cn(
-          'relative rounded-2xl bg-card/70 text-card-foreground shadow-lg shadow-black/15 backdrop-blur-xl',
+          'relative rounded-2xl bg-card/88 text-card-foreground shadow-lg shadow-black/35 backdrop-blur-xl',
           innerClassName,
         )}
         initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}

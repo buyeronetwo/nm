@@ -24,7 +24,6 @@ export function ContactSection() {
       name: '',
       phone: '',
       telegram: '',
-      email: '',
       message: '',
     },
   })
@@ -66,7 +65,7 @@ export function ContactSection() {
       <ScrollReveal className="mt-10" delaySeconds={0.06}>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="mx-auto max-w-xl space-y-5 rounded-2xl border border-white/10 bg-card/75 p-6 text-card-foreground shadow-lg shadow-black/20 backdrop-blur-xl md:p-8"
+          className="mx-auto max-w-xl space-y-5 rounded-2xl border border-white/8 bg-card/90 p-6 text-card-foreground shadow-lg shadow-black/40 backdrop-blur-xl md:p-8"
           noValidate
         >
           <div>
@@ -77,8 +76,8 @@ export function ContactSection() {
               id="lead-name"
               autoComplete="name"
               className={cn(
-                'mt-1.5 w-full rounded-lg border bg-white/5 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none transition-colors focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30',
-                errors.name ? 'border-accent' : 'border-white/15',
+                'mt-1.5 w-full rounded-lg border bg-black/35 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-colors focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30',
+                errors.name ? 'border-accent' : 'border-white/10',
               )}
               {...register('name')}
             />
@@ -98,7 +97,7 @@ export function ContactSection() {
               id="lead-phone"
               type="tel"
               autoComplete="tel"
-              className="mt-1.5 w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-foreground outline-none transition-colors focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30"
+              className="mt-1.5 w-full rounded-lg border border-white/10 bg-black/35 px-3 py-2.5 text-sm text-foreground outline-none transition-colors focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30"
               {...register('phone')}
             />
           </div>
@@ -112,35 +111,14 @@ export function ContactSection() {
               autoComplete="username"
               placeholder="@username"
               className={cn(
-                'mt-1.5 w-full rounded-lg border bg-white/5 px-3 py-2.5 text-sm text-foreground outline-none transition-colors focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30',
-                errors.telegram ? 'border-accent' : 'border-white/15',
+                'mt-1.5 w-full rounded-lg border bg-black/35 px-3 py-2.5 text-sm text-foreground outline-none transition-colors focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30',
+                errors.telegram ? 'border-accent' : 'border-white/10',
               )}
               {...register('telegram')}
             />
             {errors.telegram?.message ? (
               <p className="mt-1 text-xs text-accent" role="alert">
                 {translateFieldError(errors.telegram.message)}
-              </p>
-            ) : null}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-foreground" htmlFor="lead-email">
-              {t('contact.email')} <span className="text-accent">*</span>
-            </label>
-            <input
-              id="lead-email"
-              type="email"
-              autoComplete="email"
-              className={cn(
-                'mt-1.5 w-full rounded-lg border bg-white/5 px-3 py-2.5 text-sm text-foreground outline-none transition-colors focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30',
-                errors.email ? 'border-accent' : 'border-white/15',
-              )}
-              {...register('email')}
-            />
-            {errors.email?.message ? (
-              <p className="mt-1 text-xs text-accent" role="alert">
-                {translateFieldError(errors.email.message)}
               </p>
             ) : null}
           </div>
@@ -153,8 +131,8 @@ export function ContactSection() {
               id="lead-message"
               rows={4}
               className={cn(
-                'mt-1.5 w-full resize-y rounded-lg border bg-white/5 px-3 py-2.5 text-sm text-foreground outline-none transition-colors focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30',
-                errors.message ? 'border-accent' : 'border-white/15',
+                'mt-1.5 w-full resize-y rounded-lg border bg-black/35 px-3 py-2.5 text-sm text-foreground outline-none transition-colors focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30',
+                errors.message ? 'border-accent' : 'border-white/10',
               )}
               {...register('message')}
             />
@@ -173,7 +151,7 @@ export function ContactSection() {
 
           {formStatus === 'success' ? (
             <div
-              className="rounded-lg border border-white/10 bg-white/5 p-4 text-sm text-foreground"
+              className="rounded-lg border border-white/8 bg-black/30 p-4 text-sm text-foreground"
               role="status"
             >
               <p className="font-medium">{t('contact.success')}</p>

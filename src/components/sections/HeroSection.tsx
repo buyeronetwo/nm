@@ -42,22 +42,22 @@ export function HeroSection() {
               playsInline
             />
             <div className="hero-backdrop-vignette absolute inset-0" />
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-zinc-950/40" />
-            <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/15 via-transparent to-zinc-950/15" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/65" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/35 via-transparent to-black/35" />
           </div>
         ) : null}
         {!useVideoLayer ? (
           <>
-            <div className="absolute inset-0 bg-gradient-to-br from-zinc-700/85 via-background to-zinc-900" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_45%,rgba(129,140,248,0.18),transparent_60%)]" />
+            <div className="absolute inset-0 bg-gradient-to-br from-zinc-900/95 via-background to-black" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_45%,rgba(129,140,248,0.1),transparent_60%)]" />
           </>
         ) : null}
         <div
           className={cn(
             'absolute inset-0',
             useVideoLayer
-              ? 'bg-gradient-to-b from-background/78 via-background/62 to-background/48'
-              : 'bg-gradient-to-b from-background/45 via-background/65 to-background/88',
+              ? 'bg-gradient-to-b from-background/92 via-background/82 to-background/72'
+              : 'bg-gradient-to-b from-background/55 via-background/78 to-background/95',
           )}
         />
       </div>

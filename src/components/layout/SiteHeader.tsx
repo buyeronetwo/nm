@@ -8,6 +8,7 @@ const navigationAnchors = [
   { href: '#why', labelKey: 'nav.why' },
   { href: '#models', labelKey: 'nav.models' },
   { href: '#about', labelKey: 'nav.about' },
+  { href: '#careers', labelKey: 'nav.careers' },
   { href: '#start', labelKey: 'nav.start' },
   { href: '#faq', labelKey: 'nav.faq' },
   { href: '#contact', labelKey: 'nav.contact' },

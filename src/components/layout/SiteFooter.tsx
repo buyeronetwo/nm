@@ -14,15 +14,6 @@ export function SiteFooter() {
           </div>
           <div className="space-y-2 text-sm">
             <p>
-              <span className="text-muted">Email: </span>
-              <a
-                className="text-foreground underline-offset-4 hover:underline"
-                href={`mailto:${t('footer.email')}`}
-              >
-                {t('footer.email')}
-              </a>
-            </p>
-            <p>
               <span className="text-muted">Telegram: </span>
               <a
                 className="text-foreground underline-offset-4 hover:underline"

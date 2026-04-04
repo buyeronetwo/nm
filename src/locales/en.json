@@ -10,6 +10,7 @@
     "why": "Why us",
     "models": "Models",
     "about": "About",
+    "careers": "Careers",
     "start": "Get started",
     "faq": "FAQ",
     "contact": "Contact"
@@ -96,6 +97,15 @@
       "body": "Clear rules and numbers from test to scale—no mystery metrics."
     }
   },
+  "careers": {
+    "title": "Careers",
+    "lead": "We’re hiring an Affiliate Manager to grow partner relationships and scale traffic without sacrificing quality.",
+    "roleTitle": "Affiliate Manager",
+    "roleRequirementsLabel": "Requirements",
+    "roleRequirements": "At least 1 year in affiliate, media buying, or a related role—partners, offers, reporting, and day-to-day chat with partners.",
+    "applyIntro": "Apply via the site form or Telegram—mention the role so we can route your message quickly.",
+    "applyTelegram": "Telegram"
+  },
   "start": {
     "title": "How to get started",
     "lead": "Getting started is simple: you frame the job—we bring the sources, process, and expertise to the first stable read on performance.",
@@ -124,7 +134,6 @@
     "name": "Name",
     "phone": "Phone number",
     "telegram": "Telegram",
-    "email": "Email",
     "message": "Message",
     "submit": "Send",
     "sending": "Sending…",
@@ -137,13 +146,11 @@
     "errors": {
       "nameRequired": "Please enter your name",
       "telegramRequired": "Please enter Telegram",
-      "emailInvalid": "Invalid email",
       "messageRequired": "Please enter a message"
     }
   },
   "footer": {
     "tagline": "We deliver outcomes, think long-term, and keep our word with partners.",
-    "email": "partners@example.com",
     "telegram": "@your_team",
     "rights": "All rights reserved.",
     "privacy": "Privacy policy",
