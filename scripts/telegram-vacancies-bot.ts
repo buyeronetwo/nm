@@ -1,0 +1,382 @@
+import { randomUUID } from 'node:crypto'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+import { config } from 'dotenv'
+import { Bot, InlineKeyboard, type Context } from 'grammy'
+
+import { type Vacancy } from '../server/vacancies/types'
+import {
+  appendVacancy,
+  readVacancies,
+  removeVacancyById,
+} from '../server/vacancies/store'
+
+const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
+const projectRootDirectory = path.resolve(scriptDirectory, '..')
+
+config({ path: path.join(projectRootDirectory, '.env.local') })
+config({ path: path.join(projectRootDirectory, '.env') })
+
+const environment = process.env as Record<string, string>
+
+function parseAdministratorIds(raw: string | undefined): Set<number> {
+  if (!raw?.trim()) {
+    return new Set()
+  }
+  const identifiers = new Set<number>()
+  for (const segment of raw.split(',')) {
+    const trimmed = segment.trim()
+    if (!trimmed) {
+      continue
+    }
+    const parsed = Number(trimmed)
+    if (!Number.isNaN(parsed)) {
+      identifiers.add(parsed)
+    }
+  }
+  return identifiers
+}
+
+const administratorIds = parseAdministratorIds(process.env.TELEGRAM_ADMIN_IDS)
+const botToken = process.env.TELEGRAM_BOT_TOKEN?.trim()
+
+if (!botToken) {
+  console.error('TELEGRAM_BOT_TOKEN is required')
+  process.exit(1)
+}
+
+if (administratorIds.size === 0) {
+  console.error('TELEGRAM_ADMIN_IDS must list at least one numeric Telegram user id')
+  process.exit(1)
+}
+
+const bot = new Bot(botToken)
+
+type AddDraft = {
+  titleEn: string
+  reqEn: string
+  titleRu?: string
+  reqRu?: string
+  titleUk?: string
+  reqUk?: string
+}
+
+type WizardState =
+  | { kind: 'add'; phase: 'title_en' }
+  | { kind: 'add'; phase: 'req_en'; titleEn: string }
+  | { kind: 'add'; phase: 'title_ru'; draft: Pick<AddDraft, 'titleEn' | 'reqEn'> }
+  | { kind: 'add'; phase: 'req_ru'; draft: Pick<AddDraft, 'titleEn' | 'reqEn' | 'titleRu'> }
+  | { kind: 'add'; phase: 'title_uk'; draft: Pick<AddDraft, 'titleEn' | 'reqEn' | 'titleRu' | 'reqRu'> }
+  | { kind: 'add'; phase: 'req_uk'; draft: Pick<AddDraft, 'titleEn' | 'reqEn' | 'titleRu' | 'reqRu' | 'titleUk'> }
+
+const wizardByChatId = new Map<number, WizardState>()
+
+function clearWizard(userId: number): void {
+  wizardByChatId.delete(userId)
+}
+
+function isAdministrator(userId: number | undefined): userId is number {
+  return userId !== undefined && administratorIds.has(userId)
+}
+
+function isSkipCommand(text: string): boolean {
+  const firstToken = text.split(/\s+/)[0] ?? ''
+  return firstToken === '/skip' || firstToken.startsWith('/skip@')
+}
+
+function chunkTelegramText(text: string, maxLength: number): string[] {
+  if (text.length <= maxLength) {
+    return [text]
+  }
+  const parts: string[] = []
+  for (let index = 0; index < text.length; index += maxLength) {
+    parts.push(text.slice(index, index + maxLength))
+  }
+  return parts
+}
+
+bot.use(async (context, next) => {
+  const userId = context.from?.id
+  if (!isAdministrator(userId)) {
+    await context.reply('Нет доступа. Ваш Telegram ID не в списке TELEGRAM_ADMIN_IDS.')
+    return
+  }
+  await next()
+})
+
+function requireUserId(context: Context): number {
+  const userId = context.from?.id
+  if (userId === undefined) {
+    throw new Error('Missing user on authenticated update')
+  }
+  return userId
+}
+
+bot.command('start', async (context) => {
+  clearWizard(requireUserId(context))
+  await context.reply(
+    [
+      '<b>Vacancies bot</b>',
+      '',
+      '/list — список вакансий',
+      '/show &lt;id&gt; — полный текст',
+      '/add — добавить (EN обязателен, RU/UK по шагам)',
+      '/cancel — отменить сценарий /add',
+      '',
+      'Полная инструкция: docs/TELEGRAM_VACANCIES_BOT.md',
+    ].join('\n'),
+    { parse_mode: 'HTML' },
+  )
+})
+
+bot.command('cancel', async (context) => {
+  clearWizard(requireUserId(context))
+  await context.reply('Сценарий добавления сброшен.')
+})
+
+bot.command('list', async (context) => {
+  clearWizard(requireUserId(context))
+  const vacancies = await readVacancies(projectRootDirectory, environment)
+  if (vacancies.length === 0) {
+    await context.reply('Список пуст.')
+    return
+  }
+  const keyboard = new InlineKeyboard()
+  const lines: string[] = ['<b>Вакансии</b>']
+  vacancies.forEach((vacancy, index) => {
+    const shortTitle =
+      vacancy.title.en.length > 48 ? `${vacancy.title.en.slice(0, 45)}…` : vacancy.title.en
+    lines.push(`${index + 1}. ${escapeHtml(shortTitle)}`)
+    lines.push(`   <code>${vacancy.id}</code> · ${escapeHtml(vacancy.createdAt.slice(0, 10))}`)
+    keyboard.text(`Удалить ${index + 1}`, `dreq:${vacancy.id}`).row()
+  })
+  await context.reply(lines.join('\n'), { parse_mode: 'HTML', reply_markup: keyboard })
+})
+
+bot.command('show', async (context) => {
+  clearWizard(requireUserId(context))
+  const text = context.message?.text ?? ''
+  const identifier = text.split(/\s+/).slice(1).join(' ').trim()
+  if (!identifier) {
+    await context.reply('Укажите id: /show &lt;uuid&gt;')
+    return
+  }
+  const vacancies = await readVacancies(projectRootDirectory, environment)
+  const vacancy = vacancies.find((item) => item.id === identifier)
+  if (!vacancy) {
+    await context.reply('Вакансия не найдена.')
+    return
+  }
+  const body = formatVacancyForTelegram(vacancy)
+  const chunks = chunkTelegramText(body, 4000)
+  for (const chunk of chunks) {
+    await context.reply(chunk, { parse_mode: 'HTML' })
+  }
+})
+
+bot.command('add', async (context) => {
+  wizardByChatId.set(requireUserId(context), { kind: 'add', phase: 'title_en' })
+  await context.reply(
+    'Шаг 1/6: отправьте <b>заголовок вакансии на английском</b> (обязательно).',
+    { parse_mode: 'HTML' },
+  )
+})
+
+bot.callbackQuery(/^dreq:(.+)$/, async (context) => {
+  const vacancyId = context.match[1]
+  const vacancies = await readVacancies(projectRootDirectory, environment)
+  const vacancy = vacancies.find((item) => item.id === vacancyId)
+  const titlePreview = vacancy
+    ? vacancy.title.en.slice(0, 80)
+    : vacancyId
+  const confirmKeyboard = new InlineKeyboard()
+    .text('Да, удалить', `dyes:${vacancyId}`)
+    .text('Отмена', `dno:${vacancyId}`)
+  await context.reply(`Удалить вакансию?\n<b>${escapeHtml(titlePreview)}</b>`, {
+    parse_mode: 'HTML',
+    reply_markup: confirmKeyboard,
+  })
+  await context.answerCallbackQuery()
+})
+
+bot.callbackQuery(/^dyes:(.+)$/, async (context) => {
+  const vacancyId = context.match[1]
+  const removed = await removeVacancyById(projectRootDirectory, environment, vacancyId)
+  await context.answerCallbackQuery({ text: removed ? 'Удалено' : 'Не найдено' })
+  await context.editMessageText(
+    removed ? `Вакансия <code>${vacancyId}</code> удалена.` : 'Запись не найдена.',
+    { parse_mode: 'HTML' },
+  )
+})
+
+bot.callbackQuery(/^dno:/, async (context) => {
+  await context.answerCallbackQuery({ text: 'Отменено' })
+  await context.editMessageText('Удаление отменено.')
+})
+
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
+function formatVacancyForTelegram(vacancy: Vacancy): string {
+  const blocks = [
+    `<b>ID</b> <code>${vacancy.id}</code>`,
+    `<b>Created</b> ${escapeHtml(vacancy.createdAt)}`,
+    '',
+    '<b>Title EN</b>',
+    escapeHtml(vacancy.title.en),
+  ]
+  if (vacancy.title.ru) {
+    blocks.push('', '<b>Title RU</b>', escapeHtml(vacancy.title.ru))
+  }
+  if (vacancy.title.uk) {
+    blocks.push('', '<b>Title UK</b>', escapeHtml(vacancy.title.uk))
+  }
+  blocks.push('', '<b>Requirements EN</b>', escapeHtml(vacancy.requirements.en))
+  if (vacancy.requirements.ru) {
+    blocks.push('', '<b>Requirements RU</b>', escapeHtml(vacancy.requirements.ru))
+  }
+  if (vacancy.requirements.uk) {
+    blocks.push('', '<b>Requirements UK</b>', escapeHtml(vacancy.requirements.uk))
+  }
+  return blocks.join('\n')
+}
+
+bot.on('message:text', async (context, next) => {
+  const userId = context.from?.id
+  if (userId === undefined) {
+    return next()
+  }
+  const wizard = wizardByChatId.get(userId)
+  if (!wizard || wizard.kind !== 'add') {
+    return next()
+  }
+  const rawText = context.message.text.trim()
+  if (rawText.startsWith('/')) {
+    return next()
+  }
+
+  if (wizard.phase === 'title_en') {
+    if (!rawText) {
+      await context.reply('Заголовок не может быть пустым.')
+      return
+    }
+    wizardByChatId.set(userId, { kind: 'add', phase: 'req_en', titleEn: rawText })
+    await context.reply(
+      'Шаг 2/6: отправьте <b>требования на английском</b> (можно несколько строк).',
+      { parse_mode: 'HTML' },
+    )
+    return
+  }
+
+  if (wizard.phase === 'req_en') {
+    if (!rawText) {
+      await context.reply('Требования EN не могут быть пустыми.')
+      return
+    }
+    wizardByChatId.set(userId, {
+      kind: 'add',
+      phase: 'title_ru',
+      draft: { titleEn: wizard.titleEn, reqEn: rawText },
+    })
+    await context.reply(
+      'Шаг 3/6: <b>заголовок на русском</b> или отправьте /skip чтобы пропустить RU.',
+      { parse_mode: 'HTML' },
+    )
+    return
+  }
+
+  if (wizard.phase === 'title_ru') {
+    if (isSkipCommand(rawText)) {
+      wizardByChatId.set(userId, {
+        kind: 'add',
+        phase: 'title_uk',
+        draft: { titleEn: wizard.draft.titleEn, reqEn: wizard.draft.reqEn },
+      })
+      await context.reply(
+        'Шаг 5/6: <b>заголовок на украинском</b> или /skip чтобы пропустить UK.',
+        { parse_mode: 'HTML' },
+      )
+      return
+    }
+    wizardByChatId.set(userId, {
+      kind: 'add',
+      phase: 'req_ru',
+      draft: { ...wizard.draft, titleRu: rawText },
+    })
+    await context.reply('Шаг 4/6: отправьте <b>требования на русском</b>.', { parse_mode: 'HTML' })
+    return
+  }
+
+  if (wizard.phase === 'req_ru') {
+    if (!rawText) {
+      await context.reply('Требования RU не могут быть пустыми, если задан русский заголовок.')
+      return
+    }
+    wizardByChatId.set(userId, {
+      kind: 'add',
+      phase: 'title_uk',
+      draft: { ...wizard.draft, reqRu: rawText },
+    })
+    await context.reply(
+      'Шаг 5/6: <b>заголовок на украинском</b> или /skip чтобы пропустить UK.',
+      { parse_mode: 'HTML' },
+    )
+    return
+  }
+
+  if (wizard.phase === 'title_uk') {
+    if (isSkipCommand(rawText)) {
+      await saveVacancyFromDraft(context, wizard.draft)
+      clearWizard(userId)
+      return
+    }
+    wizardByChatId.set(userId, {
+      kind: 'add',
+      phase: 'req_uk',
+      draft: { ...wizard.draft, titleUk: rawText },
+    })
+    await context.reply('Шаг 6/6: отправьте <b>требования на украинском</b>.', { parse_mode: 'HTML' })
+    return
+  }
+
+  if (wizard.phase === 'req_uk') {
+    if (!rawText) {
+      await context.reply('Требования UK не могут быть пустыми, если задан украинский заголовок.')
+      return
+    }
+    await saveVacancyFromDraft(context, { ...wizard.draft, reqUk: rawText })
+    clearWizard(userId)
+  }
+})
+
+async function saveVacancyFromDraft(context: Context, draft: AddDraft): Promise<void> {
+  const vacancy: Vacancy = {
+    id: randomUUID(),
+    createdAt: new Date().toISOString(),
+    title: {
+      en: draft.titleEn.trim(),
+      ...(draft.titleRu ? { ru: draft.titleRu.trim() } : {}),
+      ...(draft.titleUk ? { uk: draft.titleUk.trim() } : {}),
+    },
+    requirements: {
+      en: draft.reqEn.trim(),
+      ...(draft.reqRu ? { ru: draft.reqRu.trim() } : {}),
+      ...(draft.reqUk ? { uk: draft.reqUk.trim() } : {}),
+    },
+  }
+  await appendVacancy(projectRootDirectory, environment, vacancy)
+  await context.reply(`Сохранено. ID: <code>${vacancy.id}</code>`, { parse_mode: 'HTML' })
+}
+
+bot.catch((error) => {
+  console.error('Bot error', error.error)
+})
+
+await bot.start({
+  onStart: (botInformation) => {
+    const username = botInformation.username ?? '(no username)'
+    console.info(`Vacancies bot @${username} running (long polling)`)
+  },
+})

@@ -47,7 +47,7 @@ export function AboutSection() {
                 innerClassName="bg-white/5 p-5 text-sm leading-relaxed"
               >
                 <motion.span
-                  className="text-accent-volume block text-lg font-bold leading-snug tracking-tight md:text-xl"
+                  className="text-accent-volume-flat block text-lg font-bold leading-snug tracking-tight md:text-xl"
                   initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
                   whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.25 }}

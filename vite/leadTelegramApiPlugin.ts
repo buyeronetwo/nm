@@ -1,6 +1,8 @@
 import type { Connect } from 'vite'
 import type { Plugin } from 'vite'
 
+import { readVacancies } from '../server/vacancies/store'
+
 type LeadPayload = {
   name: string
   telegram: string
@@ -61,6 +63,32 @@ function formatTelegramMessage(lead: LeadPayload): string {
     '<b>Сообщение:</b>',
     escapeHtmlForTelegram(lead.message),
   ].join('\n')
+}
+
+function attachVacanciesReadHandler(
+  middlewares: Connect.Server,
+  environment: Record<string, string>,
+  projectRootDir: string,
+): void {
+  middlewares.use(async (request, response, next) => {
+    const requestPath = request.url?.split('?')[0] ?? ''
+    if (requestPath !== '/api/vacancies' || request.method !== 'GET') {
+      next()
+      return
+    }
+    try {
+      const vacanciesList = await readVacancies(projectRootDir, environment)
+      response.statusCode = 200
+      response.setHeader('Content-Type', 'application/json; charset=utf-8')
+      response.setHeader('Cache-Control', 'no-store')
+      response.end(JSON.stringify(vacanciesList))
+    } catch (error) {
+      console.error('[api/vacancies]', error)
+      response.statusCode = 500
+      response.setHeader('Content-Type', 'application/json; charset=utf-8')
+      response.end(JSON.stringify({ ok: false, error: 'vacancies_read_failed' }))
+    }
+  })
 }
 
 function attachLeadTelegramHandler(
@@ -138,13 +166,18 @@ function attachLeadTelegramHandler(
   })
 }
 
-export function leadTelegramApiPlugin(environment: Record<string, string>): Plugin {
+export function leadTelegramApiPlugin(
+  environment: Record<string, string>,
+  projectRootDir: string,
+): Plugin {
   return {
     name: 'lead-telegram-api',
     configureServer(server) {
+      attachVacanciesReadHandler(server.middlewares, environment, projectRootDir)
       attachLeadTelegramHandler(server.middlewares, environment)
     },
     configurePreviewServer(server) {
+      attachVacanciesReadHandler(server.middlewares, environment, projectRootDir)
       attachLeadTelegramHandler(server.middlewares, environment)
     },
   }

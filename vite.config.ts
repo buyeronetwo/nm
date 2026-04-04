@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => {
   const environment = loadEnv(mode, projectRootDir, '')
 
   return {
-    plugins: [react(), tailwindcss(), leadTelegramApiPlugin(environment)],
+    plugins: [react(), tailwindcss(), leadTelegramApiPlugin(environment, projectRootDir)],
     resolve: {
       alias: {
         '@': path.resolve(projectRootDir, 'src'),

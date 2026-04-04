@@ -255,6 +255,12 @@ html {
     1px 0 0 #050506;
 }
 
+/* Тот же акцентный цвет без тёмной «обводки» (FAQ, принципы и т.п.) */
+.text-accent-volume-flat {
+  color: var(--color-accent);
+  text-shadow: none;
+}
+
 body {
   margin: 0;
   min-height: 100svh;

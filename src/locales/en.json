@@ -99,6 +99,9 @@
   },
   "careers": {
     "title": "Careers",
+    "loading": "Loading openings…",
+    "loadError": "Could not load openings from the server. Below is a template example.",
+    "emptyFromApi": "No published openings in the database yet — example below.",
     "lead": "We’re hiring an Affiliate Manager to grow partner relationships and scale traffic without sacrificing quality.",
     "roleTitle": "Affiliate Manager",
     "roleRequirementsLabel": "Requirements",
