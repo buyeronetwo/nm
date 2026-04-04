@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
 
-const faqIndices = [1, 2, 3, 4] as const
+const faqIndices = [0, 1, 2, 3, 4] as const
 
 export function FaqSection() {
   const { t } = useTranslation()

@@ -102,6 +102,8 @@
   },
   "faq": {
     "title": "Frequently asked questions",
+    "q0": "Why us?",
+    "a0": "We don’t sell clicks for their own sake—we build funnels around your KPIs, keep traffic quality in check, and share clear reporting. Fast communication, transparent terms, and a partnership mindset built for the long run.",
     "q1": "How do we integrate?",
     "a1": "We support APIs and CRM-friendly flows—less manual work, more automation from lead to status in your stack.",
     "q2": "Do you work postpay / prepay?",
