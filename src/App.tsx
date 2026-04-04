@@ -14,8 +14,8 @@ function App() {
   return (
     <AppShell>
       <HtmlLangSync />
-      <HeroSection />
       <SiteHeader />
+      <HeroSection />
       <main className="mx-auto w-full max-w-6xl flex-1 space-y-20 px-4 py-12 sm:space-y-28 sm:px-6 md:py-16">
         <WhyUsSection />
         <WorkModelsSection />

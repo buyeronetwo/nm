@@ -27,7 +27,7 @@ export function SiteHeader() {
   }
 
   return (
-    <header className="fixed left-0 right-0 top-0 z-50 border-b border-border bg-header-bg backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-header-bg backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <a
           href="#hero"

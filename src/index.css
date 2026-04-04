@@ -16,6 +16,8 @@
   --color-accent-foreground: #ffffff;
   --color-border: #27272a;
   --color-header-bg: color-mix(in srgb, var(--color-background) 80%, transparent);
+  /* Высота строки шапки (py-3 + контент) — hero и scroll-padding */
+  --site-header-height: 4rem;
 }
 
 @keyframes ambient-drift-a {
@@ -197,11 +199,13 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: var(--site-header-height);
 }
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+    scroll-padding-top: var(--site-header-height);
   }
 }
 
@@ -258,4 +262,38 @@ button:disabled {
 
 #root {
   min-height: 100svh;
+}
+
+/* Hero: слабый блюр по краям и к низу, к центру почти без размытия */
+.hero-backdrop-vignette {
+  pointer-events: none;
+  background-color: rgb(10 10 10 / 0.05);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  -webkit-mask-image: radial-gradient(
+    ellipse 84% 76% at 50% 44%,
+    transparent 0%,
+    transparent 34%,
+    rgb(0 0 0 / 0.5) 78%,
+    black 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 84% 76% at 50% 44%,
+    transparent 0%,
+    transparent 34%,
+    rgb(0 0 0 / 0.5) 78%,
+    black 100%
+  );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-backdrop-vignette {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: rgb(10 10 10 / 0.22);
+  }
 }
