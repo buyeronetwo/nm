@@ -10,9 +10,9 @@
   --color-card-foreground: #f4f4f5;
   --color-muted: #a3a3a3;
   --color-muted-foreground: #a1a1aa;
-  /* Приглушённый акцент: меньше «кричащего» красного */
-  --color-accent: #a63d42;
-  --color-accent-hover: #8f3439;
+  /* Брендовый красный: #b51720 · RGB 181,23,32 · CMYK 0,87,82,29% */
+  --color-accent: #b51720;
+  --color-accent-hover: #95141c;
   --color-accent-foreground: #ffffff;
   --color-border: #27272a;
   --color-header-bg: color-mix(in srgb, var(--color-background) 80%, transparent);
@@ -105,7 +105,7 @@
     transparent 115deg,
     rgba(186, 198, 214, 0.16) 185deg,
     transparent 245deg,
-    rgba(196, 100, 105, 0.12) 305deg,
+    rgba(181, 23, 32, 0.14) 305deg,
     transparent 360deg
   );
   filter: blur(56px);
@@ -124,7 +124,7 @@
   background: radial-gradient(
     circle,
     rgba(129, 140, 248, 0.16) 0%,
-    rgba(166, 61, 66, 0.08) 38%,
+    rgba(181, 23, 32, 0.09) 38%,
     transparent 62%
   );
   filter: blur(48px);
@@ -145,7 +145,7 @@
   top: -10%;
   background: radial-gradient(
     circle,
-    rgba(196, 100, 105, 0.22) 0%,
+    rgba(181, 23, 32, 0.24) 0%,
     transparent 68%
   );
   animation: ambient-drift-a 18s ease-in-out infinite;
