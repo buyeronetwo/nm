@@ -16,8 +16,6 @@
   --color-accent-foreground: #ffffff;
   --color-border: #27272a;
   --color-header-bg: color-mix(in srgb, var(--color-background) 80%, transparent);
-  /* Высота строки шапки (py-3 + контент) — hero и scroll-padding */
-  --site-header-height: 4rem;
 }
 
 @keyframes ambient-drift-a {
@@ -198,6 +196,8 @@
 }
 
 html {
+  /* Совпадает с высотой строки SiteHeader (py-3 + ряд кнопок) */
+  --site-header-height: 4rem;
   scroll-behavior: smooth;
   scroll-padding-top: var(--site-header-height);
 }
