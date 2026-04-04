@@ -1,12 +1,16 @@
+import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 
+import { AnimatedGlassCard } from '@/components/ui/AnimatedGlassCard'
 import { PrimaryButton } from '@/components/ui/PrimaryButton'
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
+import { usePrefersReducedMotion } from '@/hooks'
 
 const principleKeys = ['principle1', 'principle2', 'principle3'] as const
 
 export function AboutSection() {
   const { t } = useTranslation()
+  const prefersReducedMotion = usePrefersReducedMotion()
 
   function scrollToContact() {
     document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
@@ -36,13 +40,39 @@ export function AboutSection() {
       <ScrollReveal className="mt-12" delaySeconds={0.06}>
         <h3 className="text-xl font-semibold text-foreground">{t('about.principlesTitle')}</h3>
         <ul className="mt-6 grid gap-4 md:grid-cols-3">
-          {principleKeys.map((key) => (
-            <li
-              key={key}
-              className="rounded-2xl border border-dashed border-white/15 bg-white/5 p-5 text-sm leading-relaxed backdrop-blur-md"
-            >
-              <span className="font-semibold text-foreground">{t(`about.${key}.title`)}</span>
-              <span className="mt-2 block text-muted">{t(`about.${key}.body`)}</span>
+          {principleKeys.map((key, index) => (
+            <li key={key} className="h-full">
+              <AnimatedGlassCard
+                delaySeconds={index * 0.06}
+                innerClassName="bg-white/5 p-5 text-sm leading-relaxed"
+              >
+                <motion.span
+                  className="block text-lg font-bold leading-snug tracking-tight text-accent md:text-xl"
+                  initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+                  whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.25 }}
+                  transition={{
+                    duration: 0.42,
+                    delay: index * 0.06 + 0.08,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                >
+                  {t(`about.${key}.title`)}
+                </motion.span>
+                <motion.span
+                  className="mt-2 block text-muted"
+                  initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+                  whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.25 }}
+                  transition={{
+                    duration: 0.42,
+                    delay: index * 0.06 + 0.16,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                >
+                  {t(`about.${key}.body`)}
+                </motion.span>
+              </AnimatedGlassCard>
             </li>
           ))}
         </ul>

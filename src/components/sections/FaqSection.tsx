@@ -30,12 +30,14 @@ export function FaqSection() {
                 <button
                   type="button"
                   id={questionId}
-                  className="flex w-full items-center justify-between gap-4 py-4 text-left text-base font-medium text-foreground"
+                  className="flex w-full items-center justify-between gap-4 py-4 text-left"
                   aria-expanded={isOpen}
                   aria-controls={answerId}
                   onClick={() => setOpenIndex(isOpen ? null : index)}
                 >
-                  <span>{t(`faq.q${index}`)}</span>
+                  <span className="text-base font-bold leading-snug tracking-tight text-accent md:text-lg">
+                    {t(`faq.q${index}`)}
+                  </span>
                   <span
                     className={
                       isOpen

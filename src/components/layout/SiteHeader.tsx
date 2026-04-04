@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { HeaderLanguageSwitch } from '@/components/layout/HeaderLanguageSwitch'
 import { PrimaryButton } from '@/components/ui/PrimaryButton'
-import { supportedLanguages, type SupportedLanguage } from '@/i18n'
-import { cn } from '@/lib/cn'
 
 const navigationAnchors = [
   { href: '#why', labelKey: 'nav.why' },
@@ -15,7 +14,7 @@ const navigationAnchors = [
 ] as const
 
 export function SiteHeader() {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   function closeMobileMenu() {
@@ -25,10 +24,6 @@ export function SiteHeader() {
   function scrollToContact() {
     closeMobileMenu()
     document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
-  }
-
-  function changeLanguage(language: SupportedLanguage) {
-    void i18n.changeLanguage(language)
   }
 
   return (
@@ -55,48 +50,12 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
-          <div
-            className="mr-2 flex rounded-lg border border-border p-0.5"
-            role="group"
-            aria-label="Language"
-          >
-            {supportedLanguages.map((language) => (
-              <button
-                key={language}
-                type="button"
-                onClick={() => changeLanguage(language)}
-                className={cn(
-                  'rounded-md px-2 py-1 text-xs font-semibold uppercase',
-                  i18n.language.startsWith(language)
-                    ? 'bg-white/10 text-foreground'
-                    : 'text-muted hover:text-foreground',
-                )}
-              >
-                {language}
-              </button>
-            ))}
-          </div>
+          <HeaderLanguageSwitch variant="desktop" className="mr-2" />
           <PrimaryButton onClick={scrollToContact}>{t('cta.leaveRequest')}</PrimaryButton>
         </div>
 
         <div className="flex items-center gap-2 lg:hidden">
-          <div className="flex rounded-lg border border-border p-0.5">
-            {supportedLanguages.map((language) => (
-              <button
-                key={language}
-                type="button"
-                onClick={() => changeLanguage(language)}
-                className={cn(
-                  'rounded-md px-2 py-1 text-xs font-semibold uppercase',
-                  i18n.language.startsWith(language)
-                    ? 'bg-white/10 text-foreground'
-                    : 'text-muted',
-                )}
-              >
-                {language}
-              </button>
-            ))}
-          </div>
+          <HeaderLanguageSwitch variant="mobile" />
           <button
             type="button"
             className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border text-foreground"

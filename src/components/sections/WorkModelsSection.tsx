@@ -1,12 +1,16 @@
+import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 
+import { AnimatedGlassCard } from '@/components/ui/AnimatedGlassCard'
 import { PrimaryButton } from '@/components/ui/PrimaryButton'
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
+import { usePrefersReducedMotion } from '@/hooks'
 
 const modelKeys = ['cpl', 'crg', 'cpa'] as const
 
 export function WorkModelsSection() {
   const { t } = useTranslation()
+  const prefersReducedMotion = usePrefersReducedMotion()
 
   function scrollToContact() {
     document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
@@ -25,16 +29,38 @@ export function WorkModelsSection() {
       </ScrollReveal>
       <div className="mt-10 grid gap-4 md:grid-cols-3">
         {modelKeys.map((key, index) => (
-          <ScrollReveal key={key} delaySeconds={index * 0.07}>
-            <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-card/70 p-6 text-card-foreground shadow-lg shadow-black/15 backdrop-blur-xl">
-              <p className="text-sm font-medium uppercase tracking-wide text-accent">
-                {t(`models.${key}.name`)}
-              </p>
-              <p className="mt-3 text-sm leading-relaxed text-muted">
-                {t(`models.${key}.body`)}
-              </p>
-            </article>
-          </ScrollReveal>
+          <AnimatedGlassCard
+            key={key}
+            delaySeconds={index * 0.07}
+            innerClassName="flex h-full flex-col p-6"
+          >
+            <motion.p
+              className="text-2xl font-black uppercase tracking-[0.12em] text-accent drop-shadow-[0_0_24px_rgba(181,23,32,0.35)] md:text-3xl"
+              initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+              whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{
+                duration: 0.42,
+                delay: index * 0.07 + 0.08,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+            >
+              {t(`models.${key}.name`)}
+            </motion.p>
+            <motion.p
+              className="mt-4 text-sm leading-relaxed text-muted"
+              initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+              whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{
+                duration: 0.42,
+                delay: index * 0.07 + 0.16,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+            >
+              {t(`models.${key}.body`)}
+            </motion.p>
+          </AnimatedGlassCard>
         ))}
       </div>
       <ScrollReveal

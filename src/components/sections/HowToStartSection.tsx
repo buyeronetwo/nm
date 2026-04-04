@@ -36,7 +36,7 @@ export function HowToStartSection() {
               <ScrollReveal key={stepKey} delaySeconds={index * 0.06}>
                 <li className="flex gap-4">
                   <span
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-accent text-sm font-bold text-accent"
+                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent text-lg font-black tabular-nums text-accent-foreground shadow-lg shadow-accent/35 ring-2 ring-white/20"
                     aria-hidden
                   >
                     {index + 1}
