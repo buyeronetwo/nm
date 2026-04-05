@@ -54,6 +54,10 @@ if (administratorIds.size === 0) {
   process.exit(1)
 }
 
+console.info(
+  `Админы бота (TELEGRAM_ADMIN_IDS): ${[...administratorIds].sort((left, right) => left - right).join(', ')}`,
+)
+
 if (isSupabaseVacanciesWriteConfigured(environment)) {
   const supabaseHost = (() => {
     try {
@@ -149,9 +153,28 @@ async function acknowledgeCallbackQuery(context: Context): Promise<void> {
 }
 
 bot.use(async (context, next) => {
+  const update = context.update
+  const isHandledUpdateKind =
+    update.message !== undefined ||
+    update.edited_message !== undefined ||
+    update.callback_query !== undefined
+  if (!isHandledUpdateKind) {
+    await next()
+    return
+  }
+
   const userId = context.from?.id
   if (!isAdministrator(userId)) {
-    await context.reply('Нет доступа. Ваш Telegram ID не в списке TELEGRAM_ADMIN_IDS.')
+    const userIdLabel = userId !== undefined ? String(userId) : 'не определён (пишите боту в личку, не в группу)'
+    await context.reply(
+      [
+        'Нет доступа.',
+        '',
+        `Ваш Telegram user id: <code>${userIdLabel}</code>`,
+        'Добавьте это число в TELEGRAM_ADMIN_IDS в .env или .env.local и перезапустите <code>npm run bot</code>.',
+      ].join('\n'),
+      { parse_mode: 'HTML' },
+    )
     return
   }
   await next()
