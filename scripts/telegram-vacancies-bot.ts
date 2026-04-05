@@ -1,3 +1,4 @@
+import { spawn } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -198,6 +199,7 @@ bot.command('start', async (context) => {
       '/show &lt;id&gt; — полный текст',
       '/add — добавить (EN обязателен, RU/UK по шагам)',
       '/cancel — отменить сценарий /add',
+      '/restart — новый процесс npm run bot и выход (только long polling на своей машине)',
       '',
       'Полная инструкция: docs/TELEGRAM_VACANCIES_BOT.md',
     ].join('\n'),
@@ -208,6 +210,52 @@ bot.command('start', async (context) => {
 bot.command('cancel', async (context) => {
   clearWizard(requireUserId(context))
   await context.reply('Сценарий добавления сброшен.')
+})
+
+bot.command('restart', async (context) => {
+  clearWizard(requireUserId(context))
+  await context.reply(
+    [
+      'Запускаю новый <code>npm run bot</code> из корня проекта и завершаю этот процесс.',
+      '',
+      'Если бот крутится на сервере под PM2/systemd — лучше перезапускать там; здесь предполагается локальный <code>npm run bot</code>.',
+    ].join('\n'),
+    { parse_mode: 'HTML' },
+  )
+
+  const childProcess = spawn('npm', ['run', 'bot'], {
+    cwd: projectRootDirectory,
+    detached: true,
+    stdio: 'ignore',
+    env: process.env,
+    shell: process.platform === 'win32',
+  })
+
+  function scheduleExitAfterDetach(): void {
+    childProcess.unref()
+    setTimeout(() => process.exit(0), 600)
+  }
+
+  childProcess.once('error', async (spawnError) => {
+    const detail = spawnError instanceof Error ? spawnError.message : String(spawnError)
+    console.error('restart: не удалось запустить npm run bot', spawnError)
+    try {
+      await context.reply(
+        `Не удалось запустить новый процесс: ${detail}. Выполните вручную в терминале: <code>npm run bot</code>`,
+        { parse_mode: 'HTML' },
+      )
+    } catch {
+      /* чат мог стать недоступен */
+    }
+  })
+
+  if (childProcess.pid !== undefined) {
+    scheduleExitAfterDetach()
+  } else {
+    childProcess.once('spawn', () => {
+      scheduleExitAfterDetach()
+    })
+  }
 })
 
 const telegramMessageSafeMaxLength = 3800
