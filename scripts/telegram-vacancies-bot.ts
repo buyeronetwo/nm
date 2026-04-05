@@ -214,6 +214,17 @@ bot.command('cancel', async (context) => {
 
 bot.command('restart', async (context) => {
   clearWizard(requireUserId(context))
+  if (process.env.RENDER === 'true' || process.env.RENDER_EXTERNAL_URL) {
+    await context.reply(
+      [
+        'На <b>Render</b> процесс нельзя перезапустить из чата.',
+        'Откройте Dashboard → ваш Web Service → <b>Manual Deploy</b> или перезапуск сервиса.',
+      ].join('\n'),
+      { parse_mode: 'HTML' },
+    )
+    return
+  }
+
   await context.reply(
     [
       'Запускаю новый <code>npm run bot</code> из корня проекта и завершаю этот процесс.',

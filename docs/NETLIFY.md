@@ -1,5 +1,7 @@
 # Деплой на Netlify
 
+Альтернатива без отдельной функции на Edge: **[Render + один Web Service](RENDER.md)** (`render.yaml` в корне).
+
 Репозиторий уже содержит **`netlify.toml`**, **функцию** `netlify/functions/lead.ts` и скрипт **`prebuild`**, который копирует вакансии в **`public/vacancies.json`** (из `data/vacancies.json` или из `data/vacancies.seed.json`).
 
 ## Подключение репозитория

@@ -1,5 +1,12 @@
 # React + TypeScript + Vite111
 
+## Деплой
+
+- **Render (рекомендуется, один сервис: сайт + API + бот):** см. [docs/RENDER.md](docs/RENDER.md), файл **`render.yaml`** в корне.
+- **Netlify:** см. [docs/NETLIFY.md](docs/NETLIFY.md).
+
+---
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

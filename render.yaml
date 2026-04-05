@@ -1,0 +1,21 @@
+# Blueprint для [Render](https://render.com): один Web Service — статика + API + опционально бот.
+# Подключите репозиторий → New → Blueprint → выберите render.yaml.
+# Секреты (TELEGRAM_BOT_TOKEN и т.д.) добавьте в Environment группы сервиса вручную.
+
+services:
+  - type: web
+    name: nm-site
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:render
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: RUN_TELEGRAM_VACANCIES_BOT
+        value: "true"
+      - key: VITE_LEAD_API_URL
+        value: /api/lead
+      - key: VITE_VACANCIES_API_URL
+        value: /api/vacancies

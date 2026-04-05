@@ -50,6 +50,8 @@ npm run bot
 
 Откройте сайт, блок «Вакансии» запросит `GET /api/vacancies`. В боте (тот же токен, что в `.env.local`) выполняйте команды от аккаунта, чей id в `TELEGRAM_ADMIN_IDS`.
 
+**Один процесс (как на Render):** после `npm run build` — `RUN_TELEGRAM_VACANCIES_BOT=true npm run start:render` (веб + `npm run bot` в дочернем процессе). Подробнее: [RENDER.md](RENDER.md).
+
 ### Заявки с формы приходят, а `/list` и `/add` молчат
 
 Это нормально, если **не запущен** процесс **`npm run bot`**:
