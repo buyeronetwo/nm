@@ -4,13 +4,13 @@ import { useTranslation } from 'react-i18next'
 import { AnimatedGlassCard } from '@/components/ui/AnimatedGlassCard'
 import { PrimaryButton } from '@/components/ui/PrimaryButton'
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
-import { usePrefersReducedMotion } from '@/hooks'
+import { useSkipFramerViewportAnimations } from '@/hooks'
 
 const principleKeys = ['principle1', 'principle2', 'principle3'] as const
 
 export function AboutSection() {
   const { t } = useTranslation()
-  const prefersReducedMotion = usePrefersReducedMotion()
+  const skipViewportAnimations = useSkipFramerViewportAnimations()
 
   function scrollToContact() {
     document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
@@ -48,8 +48,8 @@ export function AboutSection() {
               >
                 <motion.span
                   className="text-accent-volume-flat block text-lg font-bold leading-snug tracking-tight md:text-xl"
-                  initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
-                  whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+                  initial={skipViewportAnimations ? false : { opacity: 0, y: 8 }}
+                  whileInView={skipViewportAnimations ? undefined : { opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.25 }}
                   transition={{
                     duration: 0.42,
@@ -61,8 +61,8 @@ export function AboutSection() {
                 </motion.span>
                 <motion.span
                   className="mt-2 block text-muted"
-                  initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
-                  whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+                  initial={skipViewportAnimations ? false : { opacity: 0, y: 8 }}
+                  whileInView={skipViewportAnimations ? undefined : { opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.25 }}
                   transition={{
                     duration: 0.42,

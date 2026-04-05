@@ -1,0 +1,16 @@
+[
+  {
+    "id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+    "createdAt": "2026-01-01T12:00:00.000Z",
+    "title": {
+      "en": "Affiliate Manager",
+      "ru": "Affiliate Manager",
+      "uk": "Affiliate Manager"
+    },
+    "requirements": {
+      "en": "At least 1 year in affiliate, media buying, or other relevant roles.",
+      "ru": "Опыт работы от 1 года в affiliate, медиабаинге или на разных позициях.",
+      "uk": "Досвід від 1 року в affiliate, медіабаї чи на різних позиціях."
+    }
+  }
+]

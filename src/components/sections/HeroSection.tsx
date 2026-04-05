@@ -1,6 +1,8 @@
+import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import heroBackgroundVideoUrl from '@/assets/hf_20260404_125104_272a87c5-c266-45ec-a1cc-bd772d9be288.mp4'
+import { usePreferLightMobileEffects } from '@/hooks'
 import { PrimaryButton } from '@/components/ui/PrimaryButton'
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
 import { cn } from '@/lib/cn'
@@ -15,6 +17,9 @@ const heroMinHeightClass = 'min-h-[calc(100svh-var(--site-header-height))]'
 
 export function HeroSection() {
   const { t } = useTranslation()
+  const preferLightMobileEffects = usePreferLightMobileEffects()
+  const heroSectionReference = useRef<HTMLElement>(null)
+  const heroVideoReference = useRef<HTMLVideoElement>(null)
 
   function scrollToContact() {
     document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
@@ -22,8 +27,61 @@ export function HeroSection() {
 
   const useVideoLayer = Boolean(heroVideoSourceUrl)
 
+  useEffect(() => {
+    const sectionElement = heroSectionReference.current
+    const videoElement = heroVideoReference.current
+    if (!sectionElement || !videoElement || !useVideoLayer) {
+      return
+    }
+
+    const boundVideoElement = videoElement
+    let heroIsIntersecting = false
+
+    function tryPlayVideoWhenAllowed(): void {
+      if (!heroIsIntersecting || document.hidden) {
+        return
+      }
+      void boundVideoElement.play().catch(() => undefined)
+    }
+
+    const intersectionObserver = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0]
+        heroIsIntersecting =
+          Boolean(entry?.isIntersecting) && (entry?.intersectionRatio ?? 0) > 0.06
+        if (heroIsIntersecting) {
+          tryPlayVideoWhenAllowed()
+        } else {
+          boundVideoElement.pause()
+        }
+      },
+      {
+        threshold: [0, 0.06, 0.2],
+        rootMargin: '64px 0px 64px 0px',
+      },
+    )
+
+    intersectionObserver.observe(sectionElement)
+
+    function onDocumentVisibilityChange(): void {
+      if (document.hidden) {
+        boundVideoElement.pause()
+      } else {
+        tryPlayVideoWhenAllowed()
+      }
+    }
+
+    document.addEventListener('visibilitychange', onDocumentVisibilityChange)
+
+    return () => {
+      intersectionObserver.disconnect()
+      document.removeEventListener('visibilitychange', onDocumentVisibilityChange)
+    }
+  }, [useVideoLayer])
+
   return (
     <section
+      ref={heroSectionReference}
       id="hero"
       className={cn(
         'relative scroll-mt-0 overflow-x-hidden border-b border-border',
@@ -33,13 +91,16 @@ export function HeroSection() {
     >
       <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
         {useVideoLayer ? (
-          <div className="absolute inset-0">
+          <div className="hero-video-wrap absolute inset-0">
             <video
-              className="absolute inset-0 h-full w-full object-cover object-[50%_50%]"
+              ref={heroVideoReference}
+              className="hero-video-el absolute inset-0 h-full w-full object-cover object-[50%_50%]"
               src={heroVideoSourceUrl}
               autoPlay
+              loop
               muted
               playsInline
+              preload={preferLightMobileEffects ? 'metadata' : 'auto'}
             />
             <div className="hero-backdrop-vignette absolute inset-0" />
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/65" />

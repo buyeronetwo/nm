@@ -80,9 +80,34 @@ function isAdministrator(userId: number | undefined): userId is number {
   return userId !== undefined && administratorIds.has(userId)
 }
 
-function isSkipCommand(text: string): boolean {
-  const firstToken = text.split(/\s+/)[0] ?? ''
-  return firstToken === '/skip' || firstToken.startsWith('/skip@')
+const wizardSkipWords = new Set(['skip', 'скип', 'пропустить', 'пропуск'])
+
+/**
+ * Пропуск шага RU/UK: обычное слово без / (Telegram часто криво обрабатывает /skip как команду).
+ * Считается пропуском только первое «слово» сообщения (без хвостовой пунктуации).
+ */
+function isWizardSkipMessage(text: string): boolean {
+  const trimmed = text.trim()
+  if (!trimmed) {
+    return false
+  }
+
+  const firstSegment = (trimmed.split(/\s+/)[0] ?? '').toLowerCase()
+  if (firstSegment === '/skip' || firstSegment.startsWith('/skip@')) {
+    return true
+  }
+
+  const firstWord = firstSegment.replace(/^[^\p{L}\p{N}]+/gu, '').replace(/[.,!?;:…]+$/gu, '')
+  if (wizardSkipWords.has(firstWord)) {
+    return true
+  }
+
+  const wholeMessage = trimmed.toLowerCase().replace(/[.,!?;:…]+$/gu, '')
+  if (wizardSkipWords.has(wholeMessage)) {
+    return true
+  }
+
+  return false
 }
 
 function chunkTelegramText(text: string, maxLength: number): string[] {
@@ -243,6 +268,41 @@ function formatVacancyForTelegram(vacancy: Vacancy): string {
   return blocks.join('\n')
 }
 
+async function handleWizardSkipIfApplicable(context: Context): Promise<boolean> {
+  const userId = context.from?.id
+  if (userId === undefined) {
+    return false
+  }
+  const wizard = wizardByChatId.get(userId)
+  if (!wizard || wizard.kind !== 'add') {
+    return false
+  }
+  const rawText = context.message?.text?.trim() ?? ''
+  if (!isWizardSkipMessage(rawText)) {
+    return false
+  }
+  if (wizard.phase === 'title_ru') {
+    wizardByChatId.set(userId, {
+      kind: 'add',
+      phase: 'title_uk',
+      draft: { titleEn: wizard.draft.titleEn, reqEn: wizard.draft.reqEn },
+    })
+    await context.reply(
+      'Шаг 5/6: <b>заголовок на украинском</b> или напишите <b>skip</b> / <b>скип</b> чтобы пропустить UK.',
+      { parse_mode: 'HTML' },
+    )
+    return true
+  }
+  if (wizard.phase === 'title_uk') {
+    const saved = await saveVacancyFromDraft(context, wizard.draft)
+    if (saved) {
+      clearWizard(userId)
+    }
+    return true
+  }
+  return false
+}
+
 bot.on('message:text', async (context, next) => {
   const userId = context.from?.id
   if (userId === undefined) {
@@ -253,6 +313,12 @@ bot.on('message:text', async (context, next) => {
     return next()
   }
   const rawText = context.message.text.trim()
+  if (wizard.phase === 'title_ru' || wizard.phase === 'title_uk') {
+    const skipHandled = await handleWizardSkipIfApplicable(context)
+    if (skipHandled) {
+      return
+    }
+  }
   if (rawText.startsWith('/')) {
     return next()
   }
@@ -281,25 +347,13 @@ bot.on('message:text', async (context, next) => {
       draft: { titleEn: wizard.titleEn, reqEn: rawText },
     })
     await context.reply(
-      'Шаг 3/6: <b>заголовок на русском</b> или отправьте /skip чтобы пропустить RU.',
+      'Шаг 3/6: <b>заголовок на русском</b> или напишите <b>skip</b> / <b>скип</b> чтобы пропустить RU.',
       { parse_mode: 'HTML' },
     )
     return
   }
 
   if (wizard.phase === 'title_ru') {
-    if (isSkipCommand(rawText)) {
-      wizardByChatId.set(userId, {
-        kind: 'add',
-        phase: 'title_uk',
-        draft: { titleEn: wizard.draft.titleEn, reqEn: wizard.draft.reqEn },
-      })
-      await context.reply(
-        'Шаг 5/6: <b>заголовок на украинском</b> или /skip чтобы пропустить UK.',
-        { parse_mode: 'HTML' },
-      )
-      return
-    }
     wizardByChatId.set(userId, {
       kind: 'add',
       phase: 'req_ru',
@@ -320,18 +374,13 @@ bot.on('message:text', async (context, next) => {
       draft: { ...wizard.draft, reqRu: rawText },
     })
     await context.reply(
-      'Шаг 5/6: <b>заголовок на украинском</b> или /skip чтобы пропустить UK.',
+      'Шаг 5/6: <b>заголовок на украинском</b> или напишите <b>skip</b> / <b>скип</b> чтобы пропустить UK.',
       { parse_mode: 'HTML' },
     )
     return
   }
 
   if (wizard.phase === 'title_uk') {
-    if (isSkipCommand(rawText)) {
-      await saveVacancyFromDraft(context, wizard.draft)
-      clearWizard(userId)
-      return
-    }
     wizardByChatId.set(userId, {
       kind: 'add',
       phase: 'req_uk',
@@ -346,12 +395,14 @@ bot.on('message:text', async (context, next) => {
       await context.reply('Требования UK не могут быть пустыми, если задан украинский заголовок.')
       return
     }
-    await saveVacancyFromDraft(context, { ...wizard.draft, reqUk: rawText })
-    clearWizard(userId)
+    const saved = await saveVacancyFromDraft(context, { ...wizard.draft, reqUk: rawText })
+    if (saved) {
+      clearWizard(userId)
+    }
   }
 })
 
-async function saveVacancyFromDraft(context: Context, draft: AddDraft): Promise<void> {
+async function saveVacancyFromDraft(context: Context, draft: AddDraft): Promise<boolean> {
   const vacancy: Vacancy = {
     id: randomUUID(),
     createdAt: new Date().toISOString(),
@@ -366,8 +417,17 @@ async function saveVacancyFromDraft(context: Context, draft: AddDraft): Promise<
       ...(draft.reqUk ? { uk: draft.reqUk.trim() } : {}),
     },
   }
-  await appendVacancy(projectRootDirectory, environment, vacancy)
-  await context.reply(`Сохранено. ID: <code>${vacancy.id}</code>`, { parse_mode: 'HTML' })
+  try {
+    await appendVacancy(projectRootDirectory, environment, vacancy)
+    await context.reply(`Сохранено. ID: <code>${vacancy.id}</code>`, { parse_mode: 'HTML' })
+    return true
+  } catch (error) {
+    console.error('saveVacancyFromDraft', error)
+    await context.reply(
+      'Не удалось записать файл вакансий. Проверьте папку data, права на запись и переменную VACANCIES_FILE.',
+    )
+    return false
+  }
 }
 
 bot.catch((error) => {

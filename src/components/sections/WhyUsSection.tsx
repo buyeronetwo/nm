@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import whySectionImage from '@/assets/image.png'
 import { AnimatedGlassCard } from '@/components/ui/AnimatedGlassCard'
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
-import { usePrefersReducedMotion } from '@/hooks'
+import { useSkipFramerViewportAnimations } from '@/hooks'
 
 /** Натуральный размер src/assets/image.png — под него подстраиваем рамку 2:3 */
 const whyPhotoNaturalWidth = 1024
@@ -21,7 +21,7 @@ const cardKeys = [
 
 export function WhyUsSection() {
   const { t } = useTranslation()
-  const prefersReducedMotion = usePrefersReducedMotion()
+  const skipViewportAnimations = useSkipFramerViewportAnimations()
 
   return (
     <section
@@ -70,8 +70,8 @@ export function WhyUsSection() {
                 >
                   <motion.h3
                     className="text-accent-volume text-base font-bold leading-tight tracking-tight sm:text-[1.05rem]"
-                    initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
-                    whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+                    initial={skipViewportAnimations ? false : { opacity: 0, y: 8 }}
+                    whileInView={skipViewportAnimations ? undefined : { opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.25 }}
                     transition={{
                       duration: 0.42,
@@ -83,8 +83,8 @@ export function WhyUsSection() {
                   </motion.h3>
                   <motion.p
                     className="mt-2 text-sm leading-snug text-muted"
-                    initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
-                    whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+                    initial={skipViewportAnimations ? false : { opacity: 0, y: 8 }}
+                    whileInView={skipViewportAnimations ? undefined : { opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.25 }}
                     transition={{
                       duration: 0.42,

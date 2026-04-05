@@ -4,13 +4,13 @@ import { useTranslation } from 'react-i18next'
 import { AnimatedGlassCard } from '@/components/ui/AnimatedGlassCard'
 import { PrimaryButton } from '@/components/ui/PrimaryButton'
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
-import { usePrefersReducedMotion } from '@/hooks'
+import { useSkipFramerViewportAnimations } from '@/hooks'
 
 const modelKeys = ['cpl', 'crg', 'cpa'] as const
 
 export function WorkModelsSection() {
   const { t } = useTranslation()
-  const prefersReducedMotion = usePrefersReducedMotion()
+  const skipViewportAnimations = useSkipFramerViewportAnimations()
 
   function scrollToContact() {
     document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
@@ -36,8 +36,8 @@ export function WorkModelsSection() {
           >
             <motion.p
               className="text-accent-volume text-2xl font-black uppercase tracking-[0.12em] drop-shadow-[0_0_24px_rgba(181,23,32,0.35)] md:text-3xl"
-              initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
-              whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+              initial={skipViewportAnimations ? false : { opacity: 0, y: 8 }}
+              whileInView={skipViewportAnimations ? undefined : { opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.25 }}
               transition={{
                 duration: 0.42,
@@ -49,8 +49,8 @@ export function WorkModelsSection() {
             </motion.p>
             <motion.p
               className="mt-4 text-sm leading-relaxed text-muted"
-              initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
-              whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+              initial={skipViewportAnimations ? false : { opacity: 0, y: 8 }}
+              whileInView={skipViewportAnimations ? undefined : { opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.25 }}
               transition={{
                 duration: 0.42,

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 
-import { usePrefersReducedMotion } from '@/hooks'
+import { usePreferLightMobileEffects, usePrefersReducedMotion } from '@/hooks'
 import { cn } from '@/lib/cn'
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
 
@@ -11,9 +11,11 @@ const faqIndices = [0, 1, 2, 3, 4] as const
 export function FaqSection() {
   const { t } = useTranslation()
   const prefersReducedMotion = usePrefersReducedMotion()
+  const preferLightMobileEffects = usePreferLightMobileEffects()
   const [openIndex, setOpenIndex] = useState<number | null>(0)
 
-  const panelTransition = prefersReducedMotion
+  const useInstantAccordionMotion = prefersReducedMotion || preferLightMobileEffects
+  const panelTransition = useInstantAccordionMotion
     ? { duration: 0 }
     : { duration: 0.32, ease: [0.22, 1, 0.36, 1] as const }
 
@@ -46,14 +48,27 @@ export function FaqSection() {
                   <span className="text-accent-volume-flat text-base font-bold leading-snug tracking-tight md:text-lg">
                     {t(`faq.q${index}`)}
                   </span>
-                  <motion.span
-                    className={cn('text-xl', isOpen ? 'text-accent-volume-flat' : 'text-muted')}
-                    animate={{ rotate: isOpen ? 45 : 0 }}
-                    transition={panelTransition}
-                    aria-hidden
-                  >
-                    +
-                  </motion.span>
+                  {useInstantAccordionMotion ? (
+                    <span
+                      className={cn(
+                        'text-xl',
+                        isOpen ? 'text-accent-volume-flat' : 'text-muted',
+                        isOpen && 'inline-block rotate-45',
+                      )}
+                      aria-hidden
+                    >
+                      +
+                    </span>
+                  ) : (
+                    <motion.span
+                      className={cn('text-xl', isOpen ? 'text-accent-volume-flat' : 'text-muted')}
+                      animate={{ rotate: isOpen ? 45 : 0 }}
+                      transition={panelTransition}
+                      aria-hidden
+                    >
+                      +
+                    </motion.span>
+                  )}
                 </button>
                 <motion.div
                   id={answerId}
