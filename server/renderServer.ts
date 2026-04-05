@@ -94,13 +94,39 @@ function startVacanciesBotSidecarIfEnabled(): void {
     console.info('[renderServer] vacancies bot sidecar disabled (set RUN_TELEGRAM_VACANCIES_BOT=true to enable)')
     return
   }
-  const childProcess = spawn('npm', ['run', 'bot'], {
+
+  const hasBotToken = Boolean(environment.TELEGRAM_BOT_TOKEN?.trim())
+  const hasAdminIds = Boolean(environment.TELEGRAM_ADMIN_IDS?.trim())
+  console.info('[renderServer] bot sidecar env', {
+    hasBotToken,
+    hasAdminIds,
+    cwd: projectRootDirectory,
+  })
+  if (!hasBotToken || !hasAdminIds) {
+    console.error(
+      '[renderServer] бот не запущен: в Environment Render задайте TELEGRAM_BOT_TOKEN и TELEGRAM_ADMIN_IDS (как минимум).',
+    )
+    return
+  }
+
+  const tsxCliPath = path.join(projectRootDirectory, 'node_modules', 'tsx', 'dist', 'cli.mjs')
+  const botScriptPath = path.join(projectRootDirectory, 'scripts', 'telegram-vacancies-bot.ts')
+  const childProcess = spawn(process.execPath, [tsxCliPath, botScriptPath], {
     cwd: projectRootDirectory,
     env: process.env,
     stdio: 'inherit',
   })
-  childProcess.on('exit', (exitCode, exitSignal) => {
-    console.error('[renderServer] vacancies bot child exited', { exitCode, exitSignal })
+
+  childProcess.on('error', (spawnError) => {
+    console.error('[renderServer] не удалось запустить процесс бота', spawnError)
   })
-  console.info('[renderServer] started vacancies Telegram bot sidecar (npm run bot)')
+  childProcess.on('exit', (exitCode, exitSignal) => {
+    console.error('[renderServer] процесс бота завершился', { exitCode, exitSignal })
+    if (exitCode === 1) {
+      console.error(
+        '[renderServer] типично: нет токена, пустой TELEGRAM_ADMIN_IDS или неверный токен — см. строки выше из скрипта бота.',
+      )
+    }
+  })
+  console.info('[renderServer] запущен sidecar бота вакансий (tsx scripts/telegram-vacancies-bot.ts)')
 }
