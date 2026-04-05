@@ -5,7 +5,9 @@ import { fileURLToPath } from 'node:url'
 import { config } from 'dotenv'
 import { Bot, InlineKeyboard, type Context } from 'grammy'
 
+import { resolveSupabaseUrl } from '../server/supabase/clientFactory'
 import { type Vacancy } from '../server/vacancies/types'
+import { isSupabaseVacanciesWriteConfigured } from '../server/vacancies/supabaseVacancies'
 import {
   appendVacancyUnified,
   readVacanciesForBot,
@@ -15,8 +17,9 @@ import {
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const projectRootDirectory = path.resolve(scriptDirectory, '..')
 
-config({ path: path.join(projectRootDirectory, '.env.local') })
+// Сначала база .env, затем .env.local с override — иначе пустые ключи в local блокируют значения из .env.
 config({ path: path.join(projectRootDirectory, '.env') })
+config({ path: path.join(projectRootDirectory, '.env.local'), override: true })
 
 const environment = process.env as Record<string, string | undefined>
 
@@ -49,6 +52,21 @@ if (!botToken) {
 if (administratorIds.size === 0) {
   console.error('TELEGRAM_ADMIN_IDS must list at least one numeric Telegram user id')
   process.exit(1)
+}
+
+if (isSupabaseVacanciesWriteConfigured(environment)) {
+  const supabaseHost = (() => {
+    try {
+      return new URL(resolveSupabaseUrl(environment) ?? '').host || '(invalid URL)'
+    } catch {
+      return '(invalid URL)'
+    }
+  })()
+  console.info(`Vacancies: writing to Supabase (${supabaseHost})`)
+} else {
+  console.info(
+    'Vacancies: writing to local file (нет пары SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY — в Postgres бот не пишет)',
+  )
 }
 
 const bot = new Bot(botToken)
@@ -288,7 +306,7 @@ async function handleWizardSkipIfApplicable(context: Context): Promise<boolean> 
       draft: { titleEn: wizard.draft.titleEn, reqEn: wizard.draft.reqEn },
     })
     await context.reply(
-      'Шаг 5/6: <b>заголовок на украинском</b> или напишите <b>skip</b> / <b>скип</b> чтобы пропустить UK.',
+      'Шаг 5/6: <b>заголовок на украинском</b> или напишите слово <b>skip</b> или <b>скип</b> (без слэша), чтобы пропустить UK.',
       { parse_mode: 'HTML' },
     )
     return true
@@ -302,6 +320,16 @@ async function handleWizardSkipIfApplicable(context: Context): Promise<boolean> 
   }
   return false
 }
+
+bot.command('skip', async (context) => {
+  const handled = await handleWizardSkipIfApplicable(context)
+  if (!handled) {
+    await context.reply(
+      'Пропуск только на шагах <b>3</b> и <b>5</b> (заголовок RU или UK). Обычным текстом: <b>skip</b> или <b>скип</b> (без слэша).',
+      { parse_mode: 'HTML' },
+    )
+  }
+})
 
 bot.on('message:text', async (context, next) => {
   const userId = context.from?.id
@@ -347,7 +375,7 @@ bot.on('message:text', async (context, next) => {
       draft: { titleEn: wizard.titleEn, reqEn: rawText },
     })
     await context.reply(
-      'Шаг 3/6: <b>заголовок на русском</b> или напишите <b>skip</b> / <b>скип</b> чтобы пропустить RU.',
+      'Шаг 3/6: <b>заголовок на русском</b> или напишите слово <b>skip</b> или <b>скип</b> (без слэша), чтобы пропустить RU.',
       { parse_mode: 'HTML' },
     )
     return
@@ -374,7 +402,7 @@ bot.on('message:text', async (context, next) => {
       draft: { ...wizard.draft, reqRu: rawText },
     })
     await context.reply(
-      'Шаг 5/6: <b>заголовок на украинском</b> или напишите <b>skip</b> / <b>скип</b> чтобы пропустить UK.',
+      'Шаг 5/6: <b>заголовок на украинском</b> или напишите слово <b>skip</b> или <b>скип</b> (без слэша), чтобы пропустить UK.',
       { parse_mode: 'HTML' },
     )
     return
@@ -423,9 +451,13 @@ async function saveVacancyFromDraft(context: Context, draft: AddDraft): Promise<
     return true
   } catch (error) {
     console.error('saveVacancyFromDraft', error)
-    await context.reply(
-      'Не удалось записать файл вакансий. Проверьте папку data, права на запись и переменную VACANCIES_FILE.',
-    )
+    const usingSupabase = isSupabaseVacanciesWriteConfigured(environment)
+    const detail = error instanceof Error ? error.message : String(error)
+    const hint = usingSupabase
+      ? 'Проверьте SUPABASE_URL и SUPABASE_SERVICE_ROLE_KEY, миграции таблицы public.vacancies и что ключ service_role не истёк.'
+      : 'Проверьте папку data, права на запись и VACANCIES_FILE.'
+    const text = `Не удалось сохранить вакансию (${usingSupabase ? 'Supabase' : 'файл'}). ${hint}\n\n${detail}`
+    await context.reply(text.length > 3800 ? `${text.slice(0, 3790)}…` : text)
     return false
   }
 }

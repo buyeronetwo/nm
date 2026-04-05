@@ -67,14 +67,24 @@ export async function appendVacancyToSupabase(
   if (!client) {
     throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required for Supabase vacancy writes')
   }
-  const { error } = await client.from('vacancies').insert({
-    id: vacancy.id,
-    created_at: vacancy.createdAt,
-    title: vacancy.title,
-    requirements: vacancy.requirements,
-  })
+  const { data, error } = await client
+    .from('vacancies')
+    .insert({
+      id: vacancy.id,
+      created_at: vacancy.createdAt,
+      title: vacancy.title,
+      requirements: vacancy.requirements,
+    })
+    .select('id')
+    .maybeSingle()
+
   if (error) {
     throw new Error(error.message)
+  }
+  if (!data?.id) {
+    throw new Error(
+      'Supabase: insert не вернул строку (проверьте таблицу public.vacancies и права service_role).',
+    )
   }
 }
 

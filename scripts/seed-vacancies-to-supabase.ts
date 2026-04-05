@@ -15,8 +15,8 @@ import { parseVacanciesJson } from '../server/vacancies/types'
 const scriptDirectory = dirname(fileURLToPath(import.meta.url))
 const projectRoot = join(scriptDirectory, '..')
 
-config({ path: join(projectRoot, '.env.local') })
 config({ path: join(projectRoot, '.env') })
+config({ path: join(projectRoot, '.env.local'), override: true })
 
 async function main(): Promise<void> {
   const environment = process.env as Record<string, string | undefined>

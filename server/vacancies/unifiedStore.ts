@@ -10,8 +10,9 @@ import { type Vacancy } from './types'
 import { appendVacancy, readVacancies, removeVacancyById } from './store'
 
 /**
- * Чтение: при настроенном Supabase (URL + anon) — из БД; иначе из JSON-файла.
- * Для бота при записи используется service role; чтение для бота — service (если есть) иначе anon.
+ * Чтение для dev/preview `/api/vacancies`: сначала anon (как у браузера с VITE_SUPABASE_*).
+ * Если задан только service role (бот пишет в БД, anon в .env не положили) — читаем через service,
+ * иначе список на сайте оставался бы из файла, а бот — в Supabase.
  */
 export async function readVacanciesUnified(
   projectRoot: string,
@@ -19,6 +20,9 @@ export async function readVacanciesUnified(
 ): Promise<Vacancy[]> {
   if (isSupabaseVacanciesReadConfigured(environment)) {
     return readVacanciesFromSupabaseAnon(environment)
+  }
+  if (isSupabaseVacanciesWriteConfigured(environment)) {
+    return readVacanciesFromSupabaseService(environment)
   }
   return readVacancies(projectRoot, environment as Record<string, string>)
 }

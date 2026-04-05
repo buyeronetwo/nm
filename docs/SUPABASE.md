@@ -34,6 +34,8 @@
 
 Если эти две заданы, блок «Вакансии» **читает из Supabase**. Иначе — как раньше (`VITE_VACANCIES_API_URL` или `/api/vacancies` / `/vacancies.json`).
 
+**Важно:** в `netlify.toml` по умолчанию задано `VITE_VACANCIES_API_URL=/vacancies.json` — это **статический** файл со сборки. Бот с `SUPABASE_SERVICE_ROLE_KEY` пишет в **Postgres**, а не в этот JSON: на проде добавь в панели Netlify **`VITE_SUPABASE_URL`** и **`VITE_SUPABASE_ANON_KEY`**, чтобы блок вакансий ходил в Supabase. Локально `npm run dev`: если в `.env` есть URL + service role, но **нет** anon, маршрут **`/api/vacancies`** всё равно подтянет список из БД (через service role на сервере Vite); в браузере без `VITE_SUPABASE_*` по-прежнему нужен этот dev-эндпоинт или anon в env.
+
 ### Netlify Function `lead` (секреты в UI)
 
 | Переменная | Описание |
