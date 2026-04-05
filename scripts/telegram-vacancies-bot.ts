@@ -139,6 +139,15 @@ function chunkTelegramText(text: string, maxLength: number): string[] {
   return parts
 }
 
+/** Снимает «крутилку» на inline-кнопке сразу; иначе при медленном Supabase кажется, что бот завис. */
+async function acknowledgeCallbackQuery(context: Context): Promise<void> {
+  try {
+    await context.answerCallbackQuery()
+  } catch {
+    /* дубликат ответа или устаревший callback */
+  }
+}
+
 bot.use(async (context, next) => {
   const userId = context.from?.id
   if (!isAdministrator(userId)) {
@@ -178,9 +187,18 @@ bot.command('cancel', async (context) => {
   await context.reply('Сценарий добавления сброшен.')
 })
 
+const telegramMessageSafeMaxLength = 3800
+
 bot.command('list', async (context) => {
   clearWizard(requireUserId(context))
-  const vacancies = await readVacanciesForBot(projectRootDirectory, environment)
+  let vacancies: Awaited<ReturnType<typeof readVacanciesForBot>>
+  try {
+    vacancies = await readVacanciesForBot(projectRootDirectory, environment)
+  } catch (readError) {
+    const detail = readError instanceof Error ? readError.message : String(readError)
+    await context.reply(`Не удалось загрузить вакансии: ${detail}`)
+    return
+  }
   if (vacancies.length === 0) {
     await context.reply('Список пуст.')
     return
@@ -194,7 +212,20 @@ bot.command('list', async (context) => {
     lines.push(`   <code>${vacancy.id}</code> · ${escapeHtml(vacancy.createdAt.slice(0, 10))}`)
     keyboard.text(`Удалить ${index + 1}`, `dreq:${vacancy.id}`).row()
   })
-  await context.reply(lines.join('\n'), { parse_mode: 'HTML', reply_markup: keyboard })
+  const body = lines.join('\n')
+  if (body.length > telegramMessageSafeMaxLength) {
+    await context.reply(
+      `Слишком много вакансий для одного сообщения (${vacancies.length} шт.). Используйте /show &lt;id&gt; по UUID из таблицы Supabase или сократите список.`,
+      { parse_mode: 'HTML' },
+    )
+    return
+  }
+  try {
+    await context.reply(body, { parse_mode: 'HTML', reply_markup: keyboard })
+  } catch (sendError) {
+    const detail = sendError instanceof Error ? sendError.message : String(sendError)
+    await context.reply(`Не удалось отправить список (Telegram): ${detail}`)
+  }
 })
 
 bot.command('show', async (context) => {
@@ -219,43 +250,66 @@ bot.command('show', async (context) => {
 })
 
 bot.command('add', async (context) => {
-  wizardByChatId.set(requireUserId(context), { kind: 'add', phase: 'title_en' })
-  await context.reply(
-    'Шаг 1/6: отправьте <b>заголовок вакансии на английском</b> (обязательно).',
-    { parse_mode: 'HTML' },
-  )
+  try {
+    wizardByChatId.set(requireUserId(context), { kind: 'add', phase: 'title_en' })
+    await context.reply(
+      'Шаг 1/6: отправьте <b>заголовок вакансии на английском</b> (обязательно).',
+      { parse_mode: 'HTML' },
+    )
+  } catch (sendError) {
+    const detail = sendError instanceof Error ? sendError.message : String(sendError)
+    await context.reply(`Не удалось начать /add: ${detail}`)
+  }
 })
 
 bot.callbackQuery(/^dreq:(.+)$/, async (context) => {
   const vacancyId = context.match[1]
-  const vacancies = await readVacanciesForBot(projectRootDirectory, environment)
-  const vacancy = vacancies.find((item) => item.id === vacancyId)
-  const titlePreview = vacancy
-    ? vacancy.title.en.slice(0, 80)
-    : vacancyId
-  const confirmKeyboard = new InlineKeyboard()
-    .text('Да, удалить', `dyes:${vacancyId}`)
-    .text('Отмена', `dno:${vacancyId}`)
-  await context.reply(`Удалить вакансию?\n<b>${escapeHtml(titlePreview)}</b>`, {
-    parse_mode: 'HTML',
-    reply_markup: confirmKeyboard,
-  })
-  await context.answerCallbackQuery()
+  await acknowledgeCallbackQuery(context)
+  try {
+    const vacancies = await readVacanciesForBot(projectRootDirectory, environment)
+    const vacancy = vacancies.find((item) => item.id === vacancyId)
+    const titlePreview = vacancy ? vacancy.title.en.slice(0, 80) : vacancyId
+    const confirmKeyboard = new InlineKeyboard()
+      .text('Да, удалить', `dyes:${vacancyId}`)
+      .text('Отмена', `dno:${vacancyId}`)
+    await context.reply(`Удалить вакансию?\n<b>${escapeHtml(titlePreview)}</b>`, {
+      parse_mode: 'HTML',
+      reply_markup: confirmKeyboard,
+    })
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error)
+    await context.reply(`Не удалось открыть подтверждение удаления: ${detail}`)
+  }
 })
 
 bot.callbackQuery(/^dyes:(.+)$/, async (context) => {
   const vacancyId = context.match[1]
-  const removed = await removeVacancyByIdUnified(projectRootDirectory, environment, vacancyId)
-  await context.answerCallbackQuery({ text: removed ? 'Удалено' : 'Не найдено' })
-  await context.editMessageText(
-    removed ? `Вакансия <code>${vacancyId}</code> удалена.` : 'Запись не найдена.',
-    { parse_mode: 'HTML' },
-  )
+  await acknowledgeCallbackQuery(context)
+  let removed = false
+  try {
+    removed = await removeVacancyByIdUnified(projectRootDirectory, environment, vacancyId)
+  } catch (removeError) {
+    const detail = removeError instanceof Error ? removeError.message : String(removeError)
+    await context.reply(`Не удалось удалить вакансию: ${detail}`)
+    return
+  }
+  const messageText = removed
+    ? `Вакансия <code>${vacancyId}</code> удалена.`
+    : 'Запись не найдена.'
+  try {
+    await context.editMessageText(messageText, { parse_mode: 'HTML' })
+  } catch {
+    await context.reply(messageText, { parse_mode: 'HTML' })
+  }
 })
 
 bot.callbackQuery(/^dno:/, async (context) => {
-  await context.answerCallbackQuery({ text: 'Отменено' })
-  await context.editMessageText('Удаление отменено.')
+  await acknowledgeCallbackQuery(context)
+  try {
+    await context.editMessageText('Удаление отменено.')
+  } catch {
+    await context.reply('Удаление отменено.')
+  }
 })
 
 function escapeHtml(text: string): string {
@@ -462,8 +516,25 @@ async function saveVacancyFromDraft(context: Context, draft: AddDraft): Promise<
   }
 }
 
-bot.catch((error) => {
-  console.error('Bot error', error.error)
+bot.catch(async (botError) => {
+  const rootCause = botError.error
+  console.error('Vacancies bot: ошибка в обработчике', rootCause)
+  if (rootCause instanceof Error && rootCause.stack) {
+    console.error(rootCause.stack)
+  }
+  const chatId = botError.ctx?.chat?.id
+  if (chatId === undefined) {
+    return
+  }
+  try {
+    const hint =
+      rootCause instanceof Error ? rootCause.message.slice(0, 500) : String(rootCause).slice(0, 500)
+    await botError.ctx.reply(
+      `Ошибка бота (см. консоль, где запущен npm run bot). Кратко: ${hint}`,
+    )
+  } catch {
+    /* reply может упасть (чат недоступен и т.д.) */
+  }
 })
 
 await bot.start({
