@@ -1,0 +1,29 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[functions]
+  directory = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "20"
+  # Вшиваются в клиентский бандл на этапе сборки на Netlify
+  VITE_LEAD_API_URL = "/api/lead"
+  VITE_VACANCIES_API_URL = "/vacancies.json"
+
+# Прокси как на локальном Vite: форма шлёт на тот же путь /api/lead
+[[redirects]]
+  from = "/api/lead"
+  to = "/.netlify/functions/lead"
+  status = 200
+
+# SPA: только если нет статического файла (vacancies.json, assets, index.html)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/vacancies.json"
+  [headers.values]
+    Cache-Control = "public, max-age=120, stale-while-revalidate=600"

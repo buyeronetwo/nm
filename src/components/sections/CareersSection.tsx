@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next'
 
 import { PrimaryButton } from '@/components/ui/PrimaryButton'
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
-import { getVacanciesRequestUrl } from '@/lib/vacanciesApiUrl'
+import { fetchVacanciesForCareersSection } from '@/lib/fetchVacancies'
 import { pickLocalizedBlock } from '@/lib/vacancyDisplay'
-import { type Vacancy, parseVacanciesResponse } from '@/lib/vacancyTypes'
+import { type Vacancy } from '@/lib/vacancyTypes'
 
 type VacanciesLoadState =
   | { status: 'loading' }
@@ -18,19 +18,9 @@ export function CareersSection() {
 
   useEffect(() => {
     let isActive = true
-    const requestUrl = getVacanciesRequestUrl()
     ;(async () => {
       try {
-        const response = await fetch(requestUrl, { headers: { Accept: 'application/json' } })
-        if (!isActive) {
-          return
-        }
-        if (!response.ok) {
-          setLoadState({ status: 'error' })
-          return
-        }
-        const jsonUnknown: unknown = await response.json()
-        const vacancies = parseVacanciesResponse(jsonUnknown)
+        const vacancies = await fetchVacanciesForCareersSection()
         if (!isActive) {
           return
         }

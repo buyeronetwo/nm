@@ -1,39 +1,8 @@
 import type { Connect } from 'vite'
 import type { Plugin } from 'vite'
 
-import { readVacancies } from '../server/vacancies/store'
-
-type LeadPayload = {
-  name: string
-  telegram: string
-  message: string
-}
-
-function escapeHtmlForTelegram(text: string): string {
-  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-}
-
-function isNonEmptyString(value: unknown): value is string {
-  return typeof value === 'string' && value.trim().length > 0
-}
-
-function parseLeadBody(body: unknown): { ok: true; data: LeadPayload } | { ok: false } {
-  if (!body || typeof body !== 'object') {
-    return { ok: false }
-  }
-  const record = body as Record<string, unknown>
-  if (!isNonEmptyString(record.name) || !isNonEmptyString(record.telegram) || !isNonEmptyString(record.message)) {
-    return { ok: false }
-  }
-  return {
-    ok: true,
-    data: {
-      name: record.name.trim(),
-      telegram: record.telegram.trim(),
-      message: record.message.trim(),
-    },
-  }
-}
+import { parseLeadBody, submitLeadToTelegram } from '../server/api/leadTelegram'
+import { readVacanciesUnified } from '../server/vacancies/unifiedStore'
 
 async function readJsonBody(request: Connect.IncomingMessage): Promise<unknown> {
   const bodyBuffer = await new Promise<Buffer>((resolve, reject) => {
@@ -53,18 +22,6 @@ async function readJsonBody(request: Connect.IncomingMessage): Promise<unknown> 
   return JSON.parse(raw) as unknown
 }
 
-function formatTelegramMessage(lead: LeadPayload): string {
-  return [
-    '<b>Новая заявка с сайта</b>',
-    '',
-    `<b>Имя:</b> ${escapeHtmlForTelegram(lead.name)}`,
-    `<b>Telegram:</b> ${escapeHtmlForTelegram(lead.telegram)}`,
-    '',
-    '<b>Сообщение:</b>',
-    escapeHtmlForTelegram(lead.message),
-  ].join('\n')
-}
-
 function attachVacanciesReadHandler(
   middlewares: Connect.Server,
   environment: Record<string, string>,
@@ -77,7 +34,7 @@ function attachVacanciesReadHandler(
       return
     }
     try {
-      const vacanciesList = await readVacancies(projectRootDir, environment)
+      const vacanciesList = await readVacanciesUnified(projectRootDir, environment)
       response.statusCode = 200
       response.setHeader('Content-Type', 'application/json; charset=utf-8')
       response.setHeader('Cache-Control', 'no-store')
@@ -91,10 +48,7 @@ function attachVacanciesReadHandler(
   })
 }
 
-function attachLeadTelegramHandler(
-  middlewares: Connect.Server,
-  environment: Record<string, string>,
-): void {
+function attachLeadTelegramHandler(middlewares: Connect.Server, environment: Record<string, string>): void {
   middlewares.use(async (request, response, next) => {
     const requestPath = request.url?.split('?')[0] ?? ''
     if (requestPath !== '/api/lead' || request.method !== 'POST') {
@@ -102,22 +56,10 @@ function attachLeadTelegramHandler(
       return
     }
 
-    const botToken = environment.TELEGRAM_BOT_TOKEN?.trim()
-    const chatIdRaw = environment.TELEGRAM_CHAT_ID?.trim()
-
     const sendJson = (statusCode: number, body: Record<string, unknown>) => {
       response.statusCode = statusCode
       response.setHeader('Content-Type', 'application/json')
       response.end(JSON.stringify(body))
-    }
-
-    if (!botToken || !chatIdRaw) {
-      sendJson(503, {
-        ok: false,
-        error: 'missing_telegram_config',
-        hint: 'Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in .env.local (see .env.example).',
-      })
-      return
     }
 
     let parsedBody: unknown
@@ -134,31 +76,13 @@ function attachLeadTelegramHandler(
       return
     }
 
-    const chatId = /^-?\d+$/.test(chatIdRaw) ? Number(chatIdRaw) : chatIdRaw
-    const messageText = formatTelegramMessage(parsedLead.data)
-
-    let telegramResponse: Response
-    try {
-      telegramResponse = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: messageText,
-          parse_mode: 'HTML',
-          disable_web_page_preview: true,
-        }),
-      })
-    } catch {
-      sendJson(502, { ok: false, error: 'telegram_unreachable' })
-      return
-    }
-
-    const telegramJson = (await telegramResponse.json()) as { ok?: boolean; description?: string }
-
-    if (!telegramResponse.ok || telegramJson.ok !== true) {
-      console.error('[lead-telegram]', telegramJson.description ?? telegramResponse.statusText)
-      sendJson(502, { ok: false, error: 'telegram_api_error' })
+    const result = await submitLeadToTelegram(environment, parsedLead.data)
+    if (!result.ok) {
+      const payload: Record<string, unknown> = { ok: false, error: result.error }
+      if (result.hint) {
+        payload.hint = result.hint
+      }
+      sendJson(result.httpStatus, payload)
       return
     }
 

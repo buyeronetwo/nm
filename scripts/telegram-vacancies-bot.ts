@@ -7,10 +7,10 @@ import { Bot, InlineKeyboard, type Context } from 'grammy'
 
 import { type Vacancy } from '../server/vacancies/types'
 import {
-  appendVacancy,
-  readVacancies,
-  removeVacancyById,
-} from '../server/vacancies/store'
+  appendVacancyUnified,
+  readVacanciesForBot,
+  removeVacancyByIdUnified,
+} from '../server/vacancies/unifiedStore'
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const projectRootDirectory = path.resolve(scriptDirectory, '..')
@@ -18,7 +18,7 @@ const projectRootDirectory = path.resolve(scriptDirectory, '..')
 config({ path: path.join(projectRootDirectory, '.env.local') })
 config({ path: path.join(projectRootDirectory, '.env') })
 
-const environment = process.env as Record<string, string>
+const environment = process.env as Record<string, string | undefined>
 
 function parseAdministratorIds(raw: string | undefined): Set<number> {
   if (!raw?.trim()) {
@@ -162,7 +162,7 @@ bot.command('cancel', async (context) => {
 
 bot.command('list', async (context) => {
   clearWizard(requireUserId(context))
-  const vacancies = await readVacancies(projectRootDirectory, environment)
+  const vacancies = await readVacanciesForBot(projectRootDirectory, environment)
   if (vacancies.length === 0) {
     await context.reply('Список пуст.')
     return
@@ -187,7 +187,7 @@ bot.command('show', async (context) => {
     await context.reply('Укажите id: /show &lt;uuid&gt;')
     return
   }
-  const vacancies = await readVacancies(projectRootDirectory, environment)
+  const vacancies = await readVacanciesForBot(projectRootDirectory, environment)
   const vacancy = vacancies.find((item) => item.id === identifier)
   if (!vacancy) {
     await context.reply('Вакансия не найдена.')
@@ -210,7 +210,7 @@ bot.command('add', async (context) => {
 
 bot.callbackQuery(/^dreq:(.+)$/, async (context) => {
   const vacancyId = context.match[1]
-  const vacancies = await readVacancies(projectRootDirectory, environment)
+  const vacancies = await readVacanciesForBot(projectRootDirectory, environment)
   const vacancy = vacancies.find((item) => item.id === vacancyId)
   const titlePreview = vacancy
     ? vacancy.title.en.slice(0, 80)
@@ -227,7 +227,7 @@ bot.callbackQuery(/^dreq:(.+)$/, async (context) => {
 
 bot.callbackQuery(/^dyes:(.+)$/, async (context) => {
   const vacancyId = context.match[1]
-  const removed = await removeVacancyById(projectRootDirectory, environment, vacancyId)
+  const removed = await removeVacancyByIdUnified(projectRootDirectory, environment, vacancyId)
   await context.answerCallbackQuery({ text: removed ? 'Удалено' : 'Не найдено' })
   await context.editMessageText(
     removed ? `Вакансия <code>${vacancyId}</code> удалена.` : 'Запись не найдена.',
@@ -418,7 +418,7 @@ async function saveVacancyFromDraft(context: Context, draft: AddDraft): Promise<
     },
   }
   try {
-    await appendVacancy(projectRootDirectory, environment, vacancy)
+    await appendVacancyUnified(projectRootDirectory, environment, vacancy)
     await context.reply(`Сохранено. ID: <code>${vacancy.id}</code>`, { parse_mode: 'HTML' })
     return true
   } catch (error) {

@@ -1,6 +1,6 @@
 # Telegram-бот: вакансии на сайте
 
-Сайт читает список вакансий из файла `data/vacancies.json` (или путь из `VACANCIES_FILE`). В **режиме разработки** и **`vite preview`** список отдаёт `GET /api/vacancies` (см. Vite). Отдельный процесс **`npm run bot`** подключается к Telegram и позволяет админам добавлять и удалять записи.
+Сайт читает вакансии из файла `data/vacancies.json`, из **`GET /api/vacancies`** (Vite), из **`VITE_VACANCIES_API_URL`** или из **Supabase** (см. [SUPABASE.md](SUPABASE.md)) — в зависимости от переменных окружения. Отдельный процесс **`npm run bot`** подключается к Telegram и позволяет админам добавлять и удалять записи; при **`SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`** бот пишет в таблицу `vacancies` вместо файла.
 
 ## Переменные окружения
 
@@ -11,8 +11,9 @@
 | `TELEGRAM_BOT_TOKEN` | Vite (`/api/lead`), бот | Токен от [@BotFather](https://t.me/BotFather). Один бот может и слать лиды с формы (HTTP `sendMessage`), и работать в long polling для команд. |
 | `TELEGRAM_CHAT_ID` | Только Vite | Куда слать заявки с формы (числовой id чата). |
 | `TELEGRAM_ADMIN_IDS` | Только бот | Список **числовых Telegram user id** админов через запятую. Только они могут использовать команды бота. |
-| `VACANCIES_FILE` | Vite + бот | Путь к JSON (по умолчанию `data/vacancies.json` от корня проекта). |
+| `VACANCIES_FILE` | Vite + бот | Путь к JSON (по умолчанию `data/vacancies.json` от корня проекта). Не используется, если включён Supabase. |
 | `VITE_VACANCIES_API_URL` | Сборка фронта | Если сайт на статике без Node — полный URL к вашему `GET .../vacancies`. |
+| `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | Бот (запись), скрипты | Хранение вакансий в Postgres без VPS; см. [SUPABASE.md](SUPABASE.md). |
 
 ## Как узнать свой Telegram user id
 

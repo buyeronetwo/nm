@@ -9,6 +9,7 @@ lerna-debug.log*
 
 node_modules
 data/vacancies.json
+public/vacancies.json
 dist
 dist-ssr
 *.local
